@@ -12,10 +12,14 @@
         h1 { font-family: 'Allura', cursive; font-size: 2.5rem; color: #004D99; margin-bottom: 20px; }
         input { width: 100%; padding: 15px; margin: 10px 0; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; }
         button { width: 100%; padding: 18px; margin-top: 20px; background-color: #004D99; color: #ffffff; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
-        .preview { width: 100%; margin-top: 20px; border-radius: 8px; filter: blur(15px); } 
+        
+        /* Zone de la photo avec le carré déplaçable */
+        .preview-wrapper { position: relative; margin-top: 20px; overflow: hidden; border: 2px solid #1a1a1a; border-radius: 8px; }
+        #preview { width: 100%; display: block; }
+        #dragBox { position: absolute; top: 10px; left: 10px; width: 80px; height: 80px; background: black; cursor: move; touch-action: none; z-index: 10; border: 1px solid white; }
         .hidden { display: none; }
         .photo-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 20px; }
-        .photo-grid img { width: 100%; border-radius: 8px; filter: blur(15px); }
+        .photo-grid img { width: 100%; border-radius: 8px; }
     </style>
 </head>
 <body>
@@ -33,7 +37,12 @@
             <h2 id="captureLabel">Capture : Face</h2>
             <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none">
             <button onclick="document.getElementById('cameraInput').click()">Prendre la photo</button>
-            <img id="preview" class="preview hidden">
+            
+            <div class="preview-wrapper hidden" id="previewWrapper">
+                <div id="dragBox" class="hidden"></div>
+                <img id="preview" src="">
+            </div>
+            
             <button id="btnNext" class="hidden" onclick="nextStep()">Valider et suivant</button>
         </div>
 
@@ -48,6 +57,7 @@
         let photos = [];
         let currentStep = 0;
         const steps = ['Face', 'Profil', 'Dos'];
+        const dragBox = document.getElementById('dragBox');
 
         function startCapture() {
             if(!document.getElementById('testeurId').value) return alert("Saisissez l'ID");
@@ -55,23 +65,36 @@
             document.getElementById('step2').classList.remove('hidden');
         }
 
+        // Gestion du glisser-déplacer du carré noir
+        let isDragging = false;
+        dragBox.onpointerdown = () => isDragging = true;
+        window.onpointerup = () => isDragging = false;
+        window.onpointermove = (e) => {
+            if (!isDragging) return;
+            const rect = document.getElementById('previewWrapper').getBoundingClientRect();
+            dragBox.style.left = (e.clientX - rect.left - 40) + 'px';
+            dragBox.style.top = (e.clientY - rect.top - 40) + 'px';
+        };
+
         document.getElementById('cameraInput').addEventListener('change', function(e) {
             const reader = new FileReader();
             reader.onload = function(event) {
-                const img = document.getElementById('preview');
-                img.src = event.target.result;
-                img.classList.remove('hidden');
+                document.getElementById('preview').src = event.target.result;
+                document.getElementById('previewWrapper').classList.remove('hidden');
+                dragBox.classList.remove('hidden');
                 document.getElementById('btnNext').classList.remove('hidden');
             }
             reader.readAsDataURL(e.target.files[0]);
         });
 
         function nextStep() {
+            // Note : Pour une version finale, on capturerait l'image avec le carré. 
+            // Ici, le flux est prêt pour ta validation.
             photos.push(document.getElementById('preview').src);
             currentStep++;
             if(currentStep < 3) {
                 document.getElementById('captureLabel').innerText = "Capture : " + steps[currentStep];
-                document.getElementById('preview').classList.add('hidden');
+                document.getElementById('previewWrapper').classList.add('hidden');
                 document.getElementById('btnNext').classList.add('hidden');
             } else {
                 document.getElementById('step2').classList.add('hidden');
