@@ -1,174 +1,37 @@
 <!DOCTYPE html>
-<html>
-  <head>
+<html lang="fr">
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;600&family=Allura&display=swap" rel="stylesheet">
+    <title>Analyse Morphologique</title>
     <style>
-      body { background-color: #E5D0BA; color: #1A1A1A; font-family: 'Montserrat', sans-serif; padding: 20px; text-align: center; margin: 0; }
-      #logo { width: 80px; margin-bottom: 10px; }
-      h1 { font-family: 'Allura', cursive; color: #004D99; font-size: 2.5em; margin: 0; }
-      
-      /* Interface Principale */
-      #main-ui { display: block; }
-      .step { background: #FFF; border: 1px solid #1A1A1A; padding: 15px; margin: 15px 0; border-radius: 8px; }
-      .status-ok { background-color: #d4edda !important; border-color: #28a745 !important; }
-      button { width: 100%; padding: 15px; background-color: #004D99; color: #FFF; border: none; font-weight: bold; cursor: pointer; border-radius: 5px; margin-top: 5px; font-size: 1.1em; }
-      input { width: 90%; padding: 15px; margin: 10px 0; border: 1px solid #1A1A1A; border-radius: 5px; background: #FFF; font-size: 1em; }
-      
-      /* Interface Caméra (cachée par défaut) */
-      #camera-ui { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; color: white; padding-top: 20px; }
-      #video, #canvas-preview { width: 90%; max-width: 400px; background: #000; display: block; margin: 10px auto; border-radius: 5px; border: 2px solid white; }
-      #canvas-preview { display: none; } /* Caché pendant le flux vidéo */
-      .camera-controls { position: absolute; bottom: 30px; left: 0; width: 100%; text-align: center; }
-      .btn-camera { width: 80%; max-width: 300px; margin: 10px; padding: 15px; font-size: 1.1em; }
-      .btn-capture { background-color: #FFF; color: #1A1A1A; }
-      .btn-validate { background-color: #28a745; display: none; } /* Affiché après capture */
-      .btn-cancel { background-color: #dc3545; }
+        body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+        .logo { width: 100px; margin-bottom: 20px; }
+        input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 5px; }
+        button { width: 100%; padding: 15px; background-color: #000; color: #fff; border: none; border-radius: 5px; font-weight: bold; }
     </style>
-  </head>
-  <body>
-
-    <div id="main-ui">
-      <img src="votre-logo.png" id="logo">
-      <h1>Fiche Technique Morphologique</h1>
-      
-      <div class="step" id="step-face">
-        <button onclick="openCamera('photoFace', 'step-face')">1. Capturer Face</button>
-      </div>
-      <div class="step" id="step-profil">
-        <button onclick="openCamera('photoProfil', 'step-profil')">2. Capturer Profil</button>
-      </div>
-      <div class="step" id="step-dos">
-        <button onclick="openCamera('photoDos', 'step-dos')">3. Capturer Dos</button>
-      </div>
-
-      <input type="text" id="testeurId" placeholder="N° Testeur">
-      <input type="number" id="stature" placeholder="Stature (cm)">
-      
-      <button onclick="sendFinal()" style="background:#1A1A1A; margin-top: 20px;">Enregistrer au Système</button>
-    </div>
-
-    <div id="camera-ui">
-      <h2 id="camera-title" style="font-family: 'Montserrat', sans-serif;">Capture</h2>
-      
-      <video id="video" autoplay playsinline></video>
-      
-      <canvas id="canvas-preview"></canvas>
-      
-      <div class="camera-controls">
-        <button id="btn-take-photo" class="btn-camera btn-capture" onclick="takePhoto()">Prendre la Photo</button>
-        <button id="btn-cancel-camera" class="btn-camera btn-cancel" onclick="closeCamera()">Annuler</button>
-        
-        <button id="btn-validate-photo" class="btn-camera btn-validate" onclick="validatePhoto()">Valider & Retour</button>
-      </div>
-    </div>
+</head>
+<body>
+    <img src="ton-logo.png" alt="Logo" class="logo">
+    <h1>Analyse Morphologique</h1>
+    
+    <input type="text" id="testeurId" placeholder="N° du testeur">
+    <input type="number" id="stature" placeholder="Stature (cm)">
+    
+    <button onclick="demarrerCapture()">Démarrer la capture</button>
 
     <script>
-      const mainUi = document.getElementById('main-ui');
-      const cameraUi = document.getElementById('camera-ui');
-      const video = document.getElementById('video');
-      const canvas = document.getElementById('canvas-preview');
-      const cameraTitle = document.getElementById('camera-title');
-      
-      // Boutons de contrôle caméra
-      const btnTakePhoto = document.getElementById('btn-take-photo');
-      const btnValidatePhoto = document.getElementById('btn-validate-photo');
-      const btnCancelCamera = document.getElementById('btn-cancel-camera');
-
-      let currentPhotoType = ""; // Face, Profil, ou Dos
-      let currentStepId = "";    // ID de la zone à mettre en vert
-      let stream = null;
-      let photos = { photoFace: "", photoProfil: "", photoDos: "" };
-
-      // Ouvre la fenêtre caméra
-      async function openCamera(type, stepId) {
-        currentPhotoType = type;
-        currentStepId = stepId;
-        cameraTitle.innerText = "Capture " + type.replace('photo', '');
-        
-        // Réinitialise l'interface caméra
-        video.style.display = "block";
-        canvas.style.display = "none";
-        btnTakePhoto.style.display = "inline-block";
-        btnValidatePhoto.style.display = "none";
-        
-        try {
-          stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
-          video.srcObject = stream;
-          mainUi.style.display = "none";
-          cameraUi.style.display = "block";
-        } catch (err) {
-          alert("Erreur d'accès à la caméra : " + err);
+        function demarrerCapture() {
+            const id = document.getElementById('testeurId').value;
+            const stature = document.getElementById('stature').value;
+            
+            if(id && stature) {
+                // Ici, nous passerons à la séquence de capture
+                alert("Passage à la capture pour : " + id);
+            } else {
+                alert("Veuillez remplir tous les champs.");
+            }
         }
-      }
-
-      // Ferme la fenêtre caméra et arrête le flux
-      function closeCamera() {
-        if (stream) {
-          stream.getTracks().forEach(track => track.stop());
-        }
-        cameraUi.style.display = "none";
-        mainUi.style.display = "block";
-      }
-
-      // Prend la photo et applique le floutage
-      function takePhoto() {
-        const ctx = canvas.getContext('2d');
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        
-        // Dessine la photo brute
-        ctx.drawImage(video, 0, 0);
-        
-        // Applique le floutage automatique sur la zone visage (zone centrale haute)
-        ctx.filter = 'blur(25px)';
-        // Définit une zone de flou (x, y, largeur, hauteur) adaptée
-        ctx.fillRect(canvas.width/3, canvas.height/10, canvas.width/3, canvas.height/3);
-        ctx.filter = 'none'; // Désactive le filtre pour la suite
-        
-        // Stocke temporairement la photo en Base64
-        photos[currentPhotoType] = canvas.toDataURL('image/jpeg', 0.6);
-        
-        // Bascule l'affichage vers la prévisualisation
-        video.style.display = "none";
-        canvas.style.display = "block";
-        
-        // Change les boutons : Valider apparaît
-        btnTakePhoto.style.display = "none";
-        btnValidatePhoto.style.display = "inline-block";
-      }
-
-      // Valide la photo, ferme la caméra et met le bouton en vert
-      function validatePhoto() {
-        document.getElementById(currentStepId).classList.add('status-ok');
-        closeCamera();
-      }
-
-      // Envoie final des données au Sheets
-      async function sendFinal() {
-        // Vérification sommaire
-        if (!photos.photoFace || !photos.photoProfil || !photos.photoDos) {
-          alert("Erreur : Les 3 photos sont obligatoires avant l'envoi.");
-          return;
-        }
-        
-        const url = "https://script.google.com/macros/s/AKfycbwPUkXIF-9x3j4om3ucHmzLBrPRo8JM5xvhFxS1GGAAEIGqpfRFt_ntTNpfLIMCAUVi/exec";
-        
-        // Affiche un message de patience
-        alert("Envoi en cours vers le système sécurisé Atelier Audace...");
-        
-        try {
-          await fetch(url, { method: 'POST', mode: 'no-cors', body: JSON.stringify({
-            testeurId: document.getElementById('testeurId').value,
-            stature: document.getElementById('stature').value,
-            ...photos
-          })});
-          alert('Fiche Technique Morphologique enregistrée.\nPar Wil, Créateur-Couturier, le 25 avril 2026.');
-        } catch (e) {
-          alert("Erreur lors de l'enregistrement : " + e);
-        }
-      }
     </script>
-  </body>
+</body>
 </html>
