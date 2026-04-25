@@ -5,36 +5,40 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Analyse Morphologique</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #f4f4f4; display: flex; justify-content: center; padding: 20px; margin: 0; }
-        .app-container { background: white; width: 100%; max-width: 600px; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; }
-        input, button { width: 100%; padding: 15px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
-        button { background: #000; color: #fff; font-weight: bold; cursor: pointer; }
+        body { font-family: 'Montserrat', sans-serif; background-color: #E5D0BA; display: flex; justify-content: center; padding: 20px; margin: 0; }
+        .app-container { background-color: white; width: 100%; max-width: 600px; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; }
+        .logo { width: 150px; margin-bottom: 20px; }
+        h1 { font-family: 'Allura', cursive; color: #1A1A1A; }
+        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; }
+        button { width: 100%; padding: 15px; background-color: #004D99; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; }
         #video, #photoPreview { width: 100%; background: #000; border-radius: 8px; margin-top: 15px; display: none; }
         .hidden { display: none; }
         .photo-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px; }
-        .photo-grid img { width: 100%; border-radius: 5px; border: 1px solid #ddd; }
+        .photo-grid img { width: 100%; border-radius: 5px; border: 1px solid #1A1A1A; }
     </style>
 </head>
 <body>
-    <div class="app-container" id="app">
+    <div class="app-container">
+        <img src="votre-logo.png" alt="Logo Atelier Audace" class="logo">
+        
         <div id="step1">
             <h1>Analyse Morphologique</h1>
             <input type="text" id="testeurId" placeholder="N° du testeur">
             <input type="number" id="stature" placeholder="Stature (cm)">
-            <button onclick="startSequence()">Démarrer la capture</button>
+            <button id="startBtn">Démarrer la capture</button>
         </div>
 
         <div id="step2" class="hidden">
             <h2 id="captureTitle">Capture : Face</h2>
             <video id="video" playsinline autoplay></video>
-            <button onclick="capturePhoto()">Capturer</button>
+            <button id="captureBtn">Capturer</button>
         </div>
 
         <div id="step3" class="hidden">
             <h2>Validation des photos</h2>
             <div class="photo-grid" id="photoGrid"></div>
-            <button onclick="alert('Envoi au système...')">Envoyer les photos</button>
-            <button style="background:#666" onclick="location.reload()">Recommencer</button>
+            <button onclick="alert('Envoi des données au système...')">Envoyer au système</button>
+            <button style="background:#1A1A1A" onclick="location.reload()">Recommencer</button>
         </div>
     </div>
 
@@ -44,18 +48,14 @@
         let currentStep = 0;
         const video = document.getElementById('video');
 
-        async function startSequence() {
-            if(!document.getElementById('testeurId').value) return alert("Saisissez l'ID");
+        document.getElementById('startBtn').addEventListener('click', async () => {
             document.getElementById('step1').classList.add('hidden');
             document.getElementById('step2').classList.remove('hidden');
-            
-            const stream = await navigator.mediaDevices.getUserMedia({ 
-                video: { facingMode: "environment", width: { ideal: 1280 }, height: { ideal: 720 } } 
-            });
+            const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
             video.srcObject = stream;
-        }
+        });
 
-        function capturePhoto() {
+        document.getElementById('captureBtn').addEventListener('click', () => {
             const canvas = document.createElement('canvas');
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
@@ -66,21 +66,16 @@
             if (currentStep < 3) {
                 document.getElementById('captureTitle').innerText = "Capture : " + steps[currentStep];
             } else {
-                showValidation();
+                document.getElementById('step2').classList.add('hidden');
+                document.getElementById('step3').classList.remove('hidden');
+                photos.forEach(src => {
+                    const img = document.createElement('img');
+                    img.src = src;
+                    document.getElementById('photoGrid').appendChild(img);
+                });
+                video.srcObject.getTracks().forEach(track => track.stop());
             }
-        }
-
-        function showValidation() {
-            document.getElementById('step2').classList.add('hidden');
-            document.getElementById('step3').classList.remove('hidden');
-            const grid = document.getElementById('photoGrid');
-            photos.forEach(src => {
-                const img = document.createElement('img');
-                img.src = src;
-                grid.appendChild(img);
-            });
-            video.srcObject.getTracks().forEach(track => track.stop());
-        }
+        });
     </script>
 </body>
 </html>
