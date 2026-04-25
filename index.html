@@ -3,23 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Allura&family=Montserrat:wght@300&display=swap" rel="stylesheet">
     <title>Analyse Morphologique</title>
     <style>
-        /* Charte Graphique */
-        body { background-color: #1a1a1a; color: #ffffff; font-family: 'Helvetica Neue', Arial, sans-serif; display: flex; justify-content: center; padding: 20px; margin: 0; }
-        .app-container { width: 100%; max-width: 600px; background: #ffffff; padding: 30px; border-radius: 12px; color: #333; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
-        .logo { width: 120px; display: block; margin: 0 auto 20px auto; }
-        h1 { text-align: center; font-size: 24px; color: #1a1a1a; margin-bottom: 30px; }
+        body { background-color: #E5D0BA; color: #1A1A1A; font-family: 'Montserrat', sans-serif; display: flex; justify-content: center; padding: 20px; margin: 0; }
+        .app-container { width: 100%; max-width: 600px; background: #ffffff; padding: 40px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; }
+        .logo-img { width: 150px; margin-bottom: 20px; }
+        h1 { font-family: 'Allura', cursive; font-size: 2.5rem; color: #004D99; margin-bottom: 20px; }
         input { width: 100%; padding: 15px; margin: 10px 0; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; }
-        button { width: 100%; padding: 15px; margin-top: 15px; background: #1a1a1a; color: #fff; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
-        button:disabled { background: #ccc; }
-        .preview { width: 100%; margin-top: 15px; border-radius: 8px; border: 2px solid #1a1a1a; }
+        button { width: 100%; padding: 18px; margin-top: 20px; background-color: #004D99; color: #ffffff; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        .preview { width: 100%; margin-top: 20px; border-radius: 8px; filter: blur(15px); } 
         .hidden { display: none; }
+        .photo-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 20px; }
+        .photo-grid img { width: 100%; border-radius: 8px; filter: blur(15px); }
     </style>
 </head>
 <body>
     <div class="app-container">
-        <img src="ton-logo.png" alt="Logo" class="logo">
+        <img src="votre-logo.png" alt="Logo Atelier Audace" class="logo-img">
         
         <div id="step1">
             <h1>Analyse Morphologique</h1>
@@ -31,24 +32,30 @@
         <div id="step2" class="hidden">
             <h2 id="captureLabel">Capture : Face</h2>
             <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none">
-            <button id="btnCapture" onclick="document.getElementById('cameraInput').click()">Prendre la photo</button>
+            <button onclick="document.getElementById('cameraInput').click()">Prendre la photo</button>
             <img id="preview" class="preview hidden">
             <button id="btnNext" class="hidden" onclick="nextStep()">Valider et suivant</button>
+        </div>
+
+        <div id="step3" class="hidden">
+            <h2>Validation finale</h2>
+            <div class="photo-grid" id="photoGrid"></div>
+            <button onclick="alert('Données envoyées au système')">Envoyer au système</button>
         </div>
     </div>
 
     <script>
+        let photos = [];
         let currentStep = 0;
         const steps = ['Face', 'Profil', 'Dos'];
 
         function startCapture() {
-            if(!document.getElementById('testeurId').value) return alert("Remplissez le N°");
+            if(!document.getElementById('testeurId').value) return alert("Saisissez l'ID");
             document.getElementById('step1').classList.add('hidden');
             document.getElementById('step2').classList.remove('hidden');
         }
 
         document.getElementById('cameraInput').addEventListener('change', function(e) {
-            const file = e.target.files[0];
             const reader = new FileReader();
             reader.onload = function(event) {
                 const img = document.getElementById('preview');
@@ -56,18 +63,21 @@
                 img.classList.remove('hidden');
                 document.getElementById('btnNext').classList.remove('hidden');
             }
-            reader.readAsDataURL(file);
+            reader.readAsDataURL(e.target.files[0]);
         });
 
         function nextStep() {
+            photos.push(document.getElementById('preview').src);
             currentStep++;
             if(currentStep < 3) {
                 document.getElementById('captureLabel').innerText = "Capture : " + steps[currentStep];
                 document.getElementById('preview').classList.add('hidden');
                 document.getElementById('btnNext').classList.add('hidden');
             } else {
-                alert("Capture terminée. Envoi au système.");
-                location.reload();
+                document.getElementById('step2').classList.add('hidden');
+                document.getElementById('step3').classList.remove('hidden');
+                const grid = document.getElementById('photoGrid');
+                photos.forEach(p => { const img = document.createElement('img'); img.src = p; grid.appendChild(img); });
             }
         }
     </script>
