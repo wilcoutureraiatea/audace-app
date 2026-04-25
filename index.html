@@ -2,66 +2,84 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Analyse Morphologique</title>
     <style>
-        body { font-family: sans-serif; text-align: center; padding: 20px; background: #f4f4f4; }
-        .step { display: none; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .active { display: block; }
-        video, canvas { width: 100%; max-width: 400px; border-radius: 10px; margin: 10px 0; }
-        button { width: 100%; padding: 15px; margin: 10px 0; border: none; border-radius: 5px; background: #000; color: #fff; font-size: 16px; }
-        input { width: 90%; padding: 12px; margin: 10px 0; border: 1px solid #ccc; border-radius: 5px; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f4f4f4; display: flex; justify-content: center; padding: 20px; margin: 0; }
+        .app-container { background: white; width: 100%; max-width: 600px; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; }
+        input, button { width: 100%; padding: 15px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        button { background: #000; color: #fff; font-weight: bold; cursor: pointer; }
+        #video, #photoPreview { width: 100%; background: #000; border-radius: 8px; margin-top: 15px; display: none; }
+        .hidden { display: none; }
+        .photo-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px; }
+        .photo-grid img { width: 100%; border-radius: 5px; border: 1px solid #ddd; }
     </style>
 </head>
 <body>
+    <div class="app-container" id="app">
+        <div id="step1">
+            <h1>Analyse Morphologique</h1>
+            <input type="text" id="testeurId" placeholder="N° du testeur">
+            <input type="number" id="stature" placeholder="Stature (cm)">
+            <button onclick="startSequence()">Démarrer la capture</button>
+        </div>
 
-    <div id="step1" class="step active">
-        <h1>Analyse Morphologique</h1>
-        <input type="text" id="testeurId" placeholder="N° du testeur">
-        <input type="number" id="stature" placeholder="Stature (cm)">
-        <button onclick="validerInfo()">Commencer la capture</button>
-    </div>
+        <div id="step2" class="hidden">
+            <h2 id="captureTitle">Capture : Face</h2>
+            <video id="video" playsinline autoplay></video>
+            <button onclick="capturePhoto()">Capturer</button>
+        </div>
 
-    <div id="stepCapture" class="step">
-        <h2 id="captureTitle">Capture Face</h2>
-        <video id="video" autoplay playsinline></video>
-        <button onclick="capturerImage()">Capturer</button>
-        <canvas id="canvas" style="display:none;"></canvas>
+        <div id="step3" class="hidden">
+            <h2>Validation des photos</h2>
+            <div class="photo-grid" id="photoGrid"></div>
+            <button onclick="alert('Envoi au système...')">Envoyer les photos</button>
+            <button style="background:#666" onclick="location.reload()">Recommencer</button>
+        </div>
     </div>
 
     <script>
-        let photos = { face: null, profil: null, dos: null };
-        let currentStep = 'face';
+        let photos = [];
+        const steps = ['Face', 'Profil', 'Dos'];
+        let currentStep = 0;
+        const video = document.getElementById('video');
 
-        async function validerInfo() {
-            if(document.getElementById('testeurId').value && document.getElementById('stature').value) {
-                document.getElementById('step1').classList.remove('active');
-                document.getElementById('stepCapture').classList.add('active');
-                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
-                document.getElementById('video').srcObject = stream;
-            } else { alert("Remplissez les infos !"); }
+        async function startSequence() {
+            if(!document.getElementById('testeurId').value) return alert("Saisissez l'ID");
+            document.getElementById('step1').classList.add('hidden');
+            document.getElementById('step2').classList.remove('hidden');
+            
+            const stream = await navigator.mediaDevices.getUserMedia({ 
+                video: { facingMode: "environment", width: { ideal: 1280 }, height: { ideal: 720 } } 
+            });
+            video.srcObject = stream;
         }
 
-        function capturerImage() {
-            const video = document.getElementById('video');
-            const canvas = document.getElementById('canvas');
+        function capturePhoto() {
+            const canvas = document.createElement('canvas');
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(video, 0, 0);
+            canvas.getContext('2d').drawImage(video, 0, 0);
+            photos.push(canvas.toDataURL('image/jpeg'));
 
-            if (currentStep !== 'dos') {
-                // Application du flou sur le visage (carré central)
-                ctx.filter = 'blur(20px)';
-                ctx.drawImage(canvas, canvas.width*0.3, canvas.height*0.1, canvas.width*0.4, canvas.height*0.3, canvas.width*0.3, canvas.height*0.1, canvas.width*0.4, canvas.height*0.3);
-                ctx.filter = 'none';
+            currentStep++;
+            if (currentStep < 3) {
+                document.getElementById('captureTitle').innerText = "Capture : " + steps[currentStep];
+            } else {
+                showValidation();
             }
+        }
 
-            photos[currentStep] = canvas.toDataURL('image/jpeg');
-            
-            if(currentStep === 'face') { currentStep = 'profil'; document.getElementById('captureTitle').innerText = "Capture Profil"; }
-            else if(currentStep === 'profil') { currentStep = 'dos'; document.getElementById('captureTitle').innerText = "Capture Dos"; }
-            else { alert("Capture terminée !"); console.log(photos); }
+        function showValidation() {
+            document.getElementById('step2').classList.add('hidden');
+            document.getElementById('step3').classList.remove('hidden');
+            const grid = document.getElementById('photoGrid');
+            photos.forEach(src => {
+                const img = document.createElement('img');
+                img.src = src;
+                grid.appendChild(img);
+            });
+            video.srcObject.getTracks().forEach(track => track.stop());
         }
     </script>
 </body>
