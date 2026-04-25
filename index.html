@@ -12,7 +12,6 @@
       .status-ok { background-color: #d4edda !important; border-color: #28a745 !important; }
       button { width: 100%; padding: 15px; background-color: #004D99; color: #FFF; border: none; font-weight: bold; cursor: pointer; border-radius: 5px; margin-top: 5px; }
       #video { width: 100%; max-width: 300px; background: #000; display: block; margin: 10px auto; border-radius: 5px; }
-      .hidden { display: none; }
     </style>
   </head>
   <body>
@@ -27,8 +26,8 @@
       <div class="step" id="step-dos"><button onclick="capture('photoDos', 'step-dos')">Capturer Dos</button></div>
     </div>
 
-    <input type="text" id="testeurId" placeholder="N° Testeur">
-    <input type="number" id="stature" placeholder="Stature (cm)">
+    <input type="text" id="testeurId" placeholder="N° Testeur" style="width: 90%; padding: 12px; margin: 10px 0; border: 1px solid #1A1A1A;">
+    <input type="number" id="stature" placeholder="Stature (cm)" style="width: 90%; padding: 12px; margin: 10px 0; border: 1px solid #1A1A1A;">
     <button onclick="sendFinal()" style="background:#1A1A1A;">Enregistrer au Système</button>
 
     <script>
@@ -45,17 +44,17 @@
         ctx.fillRect(canvas.width/3, canvas.height/6, canvas.width/3, canvas.height/4);
         photos[type] = canvas.toDataURL('image/jpeg', 0.5);
         document.getElementById(id).classList.add('status-ok');
-        alert(type + ' capturée.');
+        alert(type + ' capturée et anonymisée.');
       }
 
       async function sendFinal() {
-        const url = "TON_URL_APPS_SCRIPT_ICI"; // <--- REMPLACE PAR TON URL
+        const url = "https://script.google.com/macros/s/AKfycbwPUkXIF-9x3j4om3ucHmzLBrPRo8JM5xvhFxS1GGAAEIGqpfRFt_ntTNpfLIMCAUVi/exec";
         await fetch(url, { method: 'POST', mode: 'no-cors', body: JSON.stringify({
           testeurId: document.getElementById('testeurId').value,
           stature: document.getElementById('stature').value,
           ...photos
         })});
-        alert('Commande enregistrée, par Wil, Créateur-Couturier.');
+        alert('Commande enregistrée le 25 avril 2026, par Wil, Créateur-Couturier.');
       }
     </script>
   </body>
