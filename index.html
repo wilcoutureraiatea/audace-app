@@ -4,44 +4,39 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Atelier Audace - Calibration</title>
+    <link href="https://fonts.googleapis.com/css2?family=Allura&family=Montserrat:wght@300;400;700&display=swap" rel="stylesheet">
     <style>
-        /* Charte Graphique Validée */
-        body { background-color: #1a1a1a; color: #ffffff; font-family: 'Helvetica Neue', Arial, sans-serif; display: flex; justify-content: center; padding: 20px; margin: 0; }
-        .app-container { width: 100%; max-width: 600px; background: #ffffff; padding: 30px; border-radius: 12px; color: #333; box-shadow: 0 4px 15px rgba(0,0,0,0.3); position: relative;}
+        /* Charte Graphique Appliquée */
+        body { background-color: #E5D0BA; color: #1A1A1A; font-family: 'Montserrat', sans-serif; display: flex; justify-content: center; padding: 20px; margin: 0; }
+        .app-container { width: 100%; max-width: 600px; background: #ffffff; padding: 30px; border-radius: 12px; color: #1A1A1A; box-shadow: 0 4px 15px rgba(0,0,0,0.1); position: relative; }
         
-        /* Zone Logo - Remplace 'ton-logo.png' par ton vrai fichier */
-        .logo-placeholder { width: 120px; height: 60px; background: #eee; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px auto; border-radius: 8px; font-size: 12px; color: #999; }
-        .logo { width: 120px; display: block; margin: 0 auto 20px auto; }
-
-        h1 { text-align: center; font-size: 24px; color: #1a1a1a; margin-bottom: 30px; }
-        h2 { text-align: center; color: #1a1a1a; }
+        /* Logo & Titres */
+        .logo-placeholder { width: 150px; height: 70px; background: #E5D0BA; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px auto; border-radius: 8px; font-family: 'Allura', cursive; color: #1A1A1A; }
+        h1, h2 { text-align: center; font-family: 'Allura', cursive; color: #1A1A1A; margin-bottom: 20px; }
         
         /* Formulaire */
-        input { width: 100%; padding: 15px; margin: 10px 0; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
+        input { width: 100%; padding: 15px; margin: 10px 0; border: 1px solid #1A1A1A; border-radius: 8px; box-sizing: border-box; font-size: 16px; font-family: 'Montserrat', sans-serif; }
         
-        /* Boutons */
-        button { width: 100%; padding: 18px; margin-top: 15px; background: #1a1a1a; color: #fff; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px; transition: background 0.2s; }
-        button:hover { background: #333; }
-        button:disabled { background: #ccc; cursor: not-allowed; }
-        .btn-capture { background: #444; } /* Couleur différente pour le bouton photo */
+        /* Boutons (Indigo Tropical #004D99) */
+        button { width: 100%; padding: 18px; margin-top: 15px; background-color: #004D99; color: #ffffff; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px; font-family: 'Montserrat', sans-serif; }
+        button:hover { background-color: #003366; }
+        button:disabled { background-color: #ccc; }
+        .btn-capture { background-color: #1A1A1A; } 
 
-        /* Zone de capture et Masque */
-        .capture-zone { position: relative; width: 100%; margin-top: 15px; overflow: hidden; border-radius: 8px; border: 2px solid #1a1a1a; background: #000; display: none;}
+        /* Zone de capture et Masque (Technique préservée) */
+        .capture-zone { position: relative; width: 100%; margin-top: 15px; overflow: hidden; border-radius: 8px; border: 2px solid #1A1A1A; background: #000; display: none;}
         #previewImg { width: 100%; display: block; }
-        
-        /* Le carré noir déplaçable */
         #blackSquare { position: absolute; width: 60px; height: 60px; background-color: black; border: 2px solid white; cursor: move; touch-action: none; top: 10px; left: 10px; box-sizing: border-box; display: none; z-index: 10;}
 
-        /* Grille de validation finale */
+        /* Grille de validation */
         .photo-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 20px; }
-        .photo-grid img { width: 100%; border-radius: 8px; border: 2px solid #ccc; background: #eee; }
-
+        .photo-grid img { width: 100%; border-radius: 8px; border: 2px solid #1A1A1A; }
         .hidden { display: none; }
     </style>
 </head>
 <body>
     <div class="app-container">
-        <div class="logo-placeholder">LOGO</div>
+        <div class="logo-placeholder">Atelier Audace</div>
         
         <div id="step1">
             <h1>Analyse Morphologique</h1>
@@ -52,23 +47,18 @@
 
         <div id="step2" class="hidden">
             <h2 id="captureLabel">Capture : Face</h2>
-            
             <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none">
-            
             <button id="btnCapture" class="btn-capture" onclick="document.getElementById('cameraInput').click()">Ouvrir l'appareil photo</button>
-
             <div class="capture-zone" id="captureZone">
                 <img id="previewImg" src="" alt="Prévisualisation">
                 <div id="blackSquare"></div>
             </div>
-
             <button id="btnNext" class="hidden" onclick="processAndNext()">Valider le masquage</button>
         </div>
 
         <div id="step3" class="hidden">
             <h2>Validation des photos</h2>
-            <div class="photo-grid" id="photoGrid">
-                </div>
+            <div class="photo-grid" id="photoGrid"></div>
             <button onclick="sendData()">Envoyer au système</button>
             <button onclick="location.reload()" style="background:#cc0000;">Recommencer</button>
         </div>
@@ -77,9 +67,7 @@
     <script>
         let currentStep = 0;
         const steps = ['Face', 'Profil', 'Dos'];
-        const finalPhotos = []; // Stocke les images finales (fusionnées)
-        
-        // Éléments DOM
+        const finalPhotos = []; 
         const cameraInput = document.getElementById('cameraInput');
         const previewImg = document.getElementById('previewImg');
         const blackSquare = document.getElementById('blackSquare');
@@ -87,168 +75,110 @@
         const btnNext = document.getElementById('btnNext');
         const btnCapture = document.getElementById('btnCapture');
 
-        // Variables pour le déplacement du carré
         let isDragging = false;
         let startX, startY, initialLeft, initialTop;
 
-        // 1. Démarrer la capture
         function startCapture() {
             const id = document.getElementById('testeurId').value;
             const size = document.getElementById('stature').value;
             if(!id || !size) return alert("Veuillez remplir le N° de testeur et la stature.");
-            
             document.getElementById('step1').classList.add('hidden');
             document.getElementById('step2').classList.remove('hidden');
         }
 
-        // 2. Gestionnaire de capture (quand la photo est prise)
         cameraInput.addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (!file) return;
-
             const reader = new FileReader();
             reader.onload = function(event) {
-                // Affiche l'image dans la zone de capture
                 previewImg.src = event.target.result;
-                
-                // Affiche la zone et le carré
                 captureZone.style.display = 'block';
                 blackSquare.style.display = 'block';
-                
-                // Réinitialise la position du carré (en haut à gauche)
                 blackSquare.style.top = '10px';
                 blackSquare.style.left = '10px';
-                
-                // Affiche le bouton suivant et change le texte du bouton capture
                 btnNext.classList.remove('hidden');
                 btnCapture.innerText = "Refaire la photo";
             }
             reader.readAsDataURL(file);
         });
 
-        // 3. Logique de déplacement du carré noir (Drag & Drop tactile et souris)
         function startDrag(e) {
             isDragging = true;
-            // Gère souris et tactile
             const clientX = e.type.startsWith('touch') ? e.touches[0].clientX : e.clientX;
             const clientY = e.type.startsWith('touch') ? e.touches[0].clientY : e.clientY;
-            
-            startX = clientX;
-            startY = clientY;
-            initialLeft = blackSquare.offsetLeft;
-            initialTop = blackSquare.offsetTop;
-            
-            blackSquare.style.borderColor = '#00ff00'; // Feedback visuel (vert quand on déplace)
+            startX = clientX; startY = clientY;
+            initialLeft = blackSquare.offsetLeft; initialTop = blackSquare.offsetTop;
+            blackSquare.style.borderColor = '#00ff00';
         }
 
         function doDrag(e) {
             if (!isDragging) return;
-            e.preventDefault(); // Empêche le défilement de la page pendant le drag
-            
+            e.preventDefault();
             const clientX = e.type.startsWith('touch') ? e.touches[0].clientX : e.clientX;
             const clientY = e.type.startsWith('touch') ? e.touches[0].clientY : e.clientY;
-            
-            const dx = clientX - startX;
-            const dy = clientY - startY;
-            
-            // Calcule la nouvelle position
-            let newLeft = initialLeft + dx;
-            let newTop = initialTop + dy;
-            
-            // Contraintes (pour ne pas sortir de l'image)
+            const dx = clientX - startX; const dy = clientY - startY;
+            let newLeft = initialLeft + dx; let newTop = initialTop + dy;
             const maxLeft = captureZone.offsetWidth - blackSquare.offsetWidth;
             const maxTop = captureZone.offsetHeight - blackSquare.offsetHeight;
-            
             newLeft = Math.max(0, Math.min(newLeft, maxLeft));
             newTop = Math.max(0, Math.min(newTop, maxTop));
-            
             blackSquare.style.left = newLeft + 'px';
             blackSquare.style.top = newTop + 'px';
         }
 
-        function endDrag() {
-            isDragging = false;
-            blackSquare.style.borderColor = 'white'; // Remet la bordure blanche
-        }
+        function endDrag() { isDragging = false; blackSquare.style.borderColor = 'white'; }
 
-        // Événements Souris
         blackSquare.addEventListener('mousedown', startDrag);
         window.addEventListener('mousemove', doDrag);
         window.addEventListener('mouseup', endDrag);
-
-        // Événements Tactiles
         blackSquare.addEventListener('touchstart', startDrag);
         window.addEventListener('touchmove', doDrag, { passive: false });
         window.addEventListener('touchend', endDrag);
 
-
-        // 4. Fusionner le carré et l'image (C'est ICI que ça se joue !)
         function processAndNext() {
-            // Création d'un canvas (zone de dessin cachée)
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
-            
-            // Définit la taille du canvas à la taille RÉELLE de l'image photo
-            // (previewImg.naturalWidth/Height sont les dimensions réelles de la photo prise)
             canvas.width = previewImg.naturalWidth;
             canvas.height = previewImg.naturalHeight;
-            
-            // 1. Dessine la photo d'origine sur le canvas
             ctx.drawImage(previewImg, 0, 0);
-            
-            // 2. Calcule la position du carré noir RELATIVEMENT à la taille réelle de l'image
-            // (car à l'écran l'image est réduite pour tenir dans la tablette)
             const scaleX = previewImg.naturalWidth / previewImg.offsetWidth;
             const scaleY = previewImg.naturalHeight / previewImg.offsetHeight;
-            
             const rectX = blackSquare.offsetLeft * scaleX;
             const rectY = blackSquare.offsetTop * scaleY;
             const rectW = blackSquare.offsetWidth * scaleX;
             const rectH = blackSquare.offsetHeight * scaleY;
-            
-            // 3. Dessine le carré noir DÉFINITIVEMENT sur le canvas
             ctx.fillStyle = 'black';
             ctx.fillRect(rectX, rectY, rectW, rectH);
-            
-            // 4. Convertit le canvas en image finale (base64) et stocke
-            finalPhotos.push(canvas.toDataURL('image/jpeg', 0.8)); // 0.8 = qualité 80%
+            finalPhotos.push(canvas.toDataURL('image/jpeg', 0.8));
 
-            // 5. Passe à l'étape suivante
             currentStep++;
             if(currentStep < 3) {
-                // Réinitialise l'interface pour la capture suivante
                 document.getElementById('captureLabel').innerText = "Capture : " + steps[currentStep];
                 captureZone.style.display = 'none';
                 blackSquare.style.display = 'none';
                 btnNext.classList.add('hidden');
                 btnCapture.innerText = "Ouvrir l'appareil photo";
-                cameraInput.value = ''; // Vide l'input pour permettre de reprendre une photo
+                cameraInput.value = '';
             } else {
                 showFinalValidation();
             }
         }
 
-        // 5. Afficher la validation finale
         function showFinalValidation() {
             document.getElementById('step2').classList.add('hidden');
             document.getElementById('step3').classList.remove('hidden');
-            
             const grid = document.getElementById('photoGrid');
-            grid.innerHTML = ''; // Vide la grille au cas où
-            
+            grid.innerHTML = '';
             finalPhotos.forEach((photoData, index) => {
                 const img = document.createElement('img');
                 img.src = photoData;
-                img.alt = steps[index];
                 grid.appendChild(img);
             });
         }
 
-        // 6. Simuler l'envoi (prochaine étape technique)
         function sendData() {
             const id = document.getElementById('testeurId').value;
-            alert(`Simulation : Envoi des données pour le testeur ${id} avec les 3 photos anonymisées.`);
-            // ICI on ajoutera le code pour Google Sheet
+            alert(`Données envoyées pour le testeur ${id}. Photos anonymisées.`);
         }
     </script>
 </body>
