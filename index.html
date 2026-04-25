@@ -3,72 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Atelier Audace - Calibration</title>
     <style>
-        body { background-color: #1a1a1a; color: #ffffff; font-family: 'Helvetica Neue', Arial, sans-serif; display: flex; justify-content: center; padding: 20px; }
-        .app-container { width: 100%; max-width: 600px; text-align: center; }
-        .step-box { background: #262626; padding: 30px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        input { width: 100%; padding: 15px; margin: 15px 0; border: none; border-radius: 8px; background: #333; color: white; font-size: 16px; }
-        button { width: 100%; padding: 18px; margin: 10px 0; border: none; border-radius: 8px; background: #fff; color: #000; font-weight: bold; cursor: pointer; }
-        video { width: 100%; border-radius: 10px; margin-top: 15px; display: none; }
-        .photo-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 20px; }
-        .photo-grid img { width: 100%; border-radius: 8px; border: 2px solid #444; }
-        .hidden { display: none; }
+        body { background-color: #E5D0BA; color: #1A1A1A; font-family: 'Montserrat', sans-serif; display: flex; justify-content: center; padding: 20px; }
+        .app-container { width: 100%; max-width: 500px; text-align: center; }
+        input { width: 100%; padding: 15px; margin: 10px 0; border: 1px solid #1A1A1A; background: #E5D0BA; font-family: 'Montserrat', sans-serif; }
+        button { width: 100%; padding: 15px; background: #004D99; color: #fff; border: none; font-weight: bold; cursor: pointer; }
+        h1 { font-family: 'Allura', cursive; font-size: 2.5rem; }
+        #video { width: 100%; background: #000; display: none; }
     </style>
 </head>
 <body>
     <div class="app-container">
-        <div id="step1" class="step-box">
-            <h1>Analyse Morphologique</h1>
-            <input type="number" id="testeurId" placeholder="N° Testeur" inputmode="numeric">
-            <input type="number" id="stature" placeholder="Stature (cm)" inputmode="numeric">
-            <button onclick="nextStep(2)">Démarrer la capture</button>
-        </div>
-
-        <div id="step2" class="step-box hidden">
-            <h2 id="stepTitle">Capture : Face</h2>
-            <video id="video" playsinline autoplay muted></video>
-            <button onclick="captureCurrent()">Capturer cette vue</button>
-        </div>
-
-        <div id="step3" class="step-box hidden">
-            <h2>Validation finale</h2>
-            <div class="photo-grid" id="photoGrid"></div>
-            <button onclick="alert('Données envoyées au système avec succès')">Envoyer au système</button>
-            <button onclick="location.reload()" style="background:#444; color:white;">Recommencer</button>
-        </div>
+        <h1>Analyse Morphologique</h1>
+        <input type="number" id="testeurId" placeholder="N° Testeur" inputmode="numeric">
+        <input type="number" id="stature" placeholder="Stature (cm)" inputmode="numeric">
+        <button onclick="startCam()">Démarrer la capture</button>
+        <video id="video" playsinline autoplay></video>
     </div>
 
     <script>
-        let currentIdx = 0;
-        const steps = ['Face', 'Profil', 'Dos'];
-        const photos = [];
-        const video = document.getElementById('video');
-
-        async function nextStep(stepNum) {
-            if(stepNum === 2) {
-                document.getElementById('step1').classList.add('hidden');
-                document.getElementById('step2').classList.remove('hidden');
-                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
-                video.srcObject = stream;
-            }
-        }
-
-        function captureCurrent() {
-            const canvas = document.createElement('canvas');
-            canvas.width = video.videoWidth; canvas.height = video.videoHeight;
-            canvas.getContext('2d').drawImage(video, 0, 0);
-            photos.push(canvas.toDataURL('image/jpeg'));
-            
-            if(currentIdx < 2) {
-                currentIdx++;
-                document.getElementById('stepTitle').innerText = "Capture : " + steps[currentIdx];
-            } else {
-                document.getElementById('step2').classList.add('hidden');
-                document.getElementById('step3').classList.remove('hidden');
-                const grid = document.getElementById('photoGrid');
-                photos.forEach(p => { const img = document.createElement('img'); img.src = p; grid.appendChild(img); });
-            }
+        async function startCam() {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+            const v = document.getElementById('video');
+            v.srcObject = stream;
+            v.style.display = 'block';
         }
     </script>
 </body>
