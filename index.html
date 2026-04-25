@@ -3,30 +3,72 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analyse Morphologique</title>
     <style>
-        body { background-color: #E5D0BA; color: #1A1A1A; font-family: 'Montserrat', sans-serif; display: flex; justify-content: center; padding: 20px; }
-        .app-container { width: 100%; max-width: 500px; text-align: center; }
-        input { width: 100%; padding: 15px; margin: 10px 0; border: 1px solid #1A1A1A; background: #E5D0BA; font-family: 'Montserrat', sans-serif; }
-        button { width: 100%; padding: 15px; background: #004D99; color: #fff; border: none; font-weight: bold; cursor: pointer; }
-        h1 { font-family: 'Allura', cursive; font-size: 2.5rem; }
-        #video { width: 100%; background: #000; display: none; }
+        /* Charte Graphique */
+        body { background-color: #1a1a1a; color: #ffffff; font-family: 'Helvetica Neue', Arial, sans-serif; display: flex; justify-content: center; padding: 20px; margin: 0; }
+        .app-container { width: 100%; max-width: 600px; background: #ffffff; padding: 30px; border-radius: 12px; color: #333; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+        .logo { width: 120px; display: block; margin: 0 auto 20px auto; }
+        h1 { text-align: center; font-size: 24px; color: #1a1a1a; margin-bottom: 30px; }
+        input { width: 100%; padding: 15px; margin: 10px 0; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; }
+        button { width: 100%; padding: 15px; margin-top: 15px; background: #1a1a1a; color: #fff; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        button:disabled { background: #ccc; }
+        .preview { width: 100%; margin-top: 15px; border-radius: 8px; border: 2px solid #1a1a1a; }
+        .hidden { display: none; }
     </style>
 </head>
 <body>
     <div class="app-container">
-        <h1>Analyse Morphologique</h1>
-        <input type="number" id="testeurId" placeholder="N° Testeur" inputmode="numeric">
-        <input type="number" id="stature" placeholder="Stature (cm)" inputmode="numeric">
-        <button onclick="startCam()">Démarrer la capture</button>
-        <video id="video" playsinline autoplay></video>
+        <img src="ton-logo.png" alt="Logo" class="logo">
+        
+        <div id="step1">
+            <h1>Analyse Morphologique</h1>
+            <input type="number" id="testeurId" placeholder="N° du testeur" inputmode="numeric">
+            <input type="number" id="stature" placeholder="Stature (cm)" inputmode="numeric">
+            <button onclick="startCapture()">Démarrer la capture</button>
+        </div>
+
+        <div id="step2" class="hidden">
+            <h2 id="captureLabel">Capture : Face</h2>
+            <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none">
+            <button id="btnCapture" onclick="document.getElementById('cameraInput').click()">Prendre la photo</button>
+            <img id="preview" class="preview hidden">
+            <button id="btnNext" class="hidden" onclick="nextStep()">Valider et suivant</button>
+        </div>
     </div>
 
     <script>
-        async function startCam() {
-            const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
-            const v = document.getElementById('video');
-            v.srcObject = stream;
-            v.style.display = 'block';
+        let currentStep = 0;
+        const steps = ['Face', 'Profil', 'Dos'];
+
+        function startCapture() {
+            if(!document.getElementById('testeurId').value) return alert("Remplissez le N°");
+            document.getElementById('step1').classList.add('hidden');
+            document.getElementById('step2').classList.remove('hidden');
+        }
+
+        document.getElementById('cameraInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const img = document.getElementById('preview');
+                img.src = event.target.result;
+                img.classList.remove('hidden');
+                document.getElementById('btnNext').classList.remove('hidden');
+            }
+            reader.readAsDataURL(file);
+        });
+
+        function nextStep() {
+            currentStep++;
+            if(currentStep < 3) {
+                document.getElementById('captureLabel').innerText = "Capture : " + steps[currentStep];
+                document.getElementById('preview').classList.add('hidden');
+                document.getElementById('btnNext').classList.add('hidden');
+            } else {
+                alert("Capture terminée. Envoi au système.");
+                location.reload();
+            }
         }
     </script>
 </body>
