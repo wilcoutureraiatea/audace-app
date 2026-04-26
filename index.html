@@ -2,24 +2,109 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300&family=Allura&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Atelier Audace - Précision</title>
     <style>
-        body { background-color: #E5D0BA; color: #1A1A1A; font-family: 'Montserrat', sans-serif; display: flex; justify-content: center; padding: 20px; }
-        h1, h2 { font-family: 'Allura', cursive; color: #1A1A1A; text-align: center; }
-        .app-container { background: #FFFFFF; padding: 40px; border-radius: 12px; width: 100%; max-width: 500px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        input { width: 100%; padding: 15px; margin: 10px 0; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-        button { width: 100%; padding: 15px; background: #004D99; color: #fff; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; }
+        body { background-color: #1a1a1a; color: #ffffff; font-family: 'Helvetica Neue', sans-serif; display: flex; justify-content: center; padding: 20px; margin: 0; }
+        .app-container { width: 100%; max-width: 600px; background: #ffffff; padding: 30px; border-radius: 12px; color: #333; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+        .logo { width: 120px; display: block; margin: 0 auto 20px auto; }
+        input { width: 100%; padding: 18px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        button { width: 100%; padding: 18px; margin-top: 15px; background: #000; color: #fff; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; text-transform: uppercase; }
+        .capture-zone { position: relative; width: 100%; margin-top: 20px; border: 2px solid #000; background: #000; display: none; }
+        #previewImg { width: 100%; display: block; }
+        /* Masque fixe et centré */
+        #blackSquare { position: absolute; width: 20%; height: 15%; background-color: black; border: 2px solid white; top: 15%; left: 40%; z-index: 10; display: none; }
+        .photo-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 20px; }
+        .photo-grid img { width: 100%; border-radius: 8px; border: 2px solid #ccc; }
+        .hidden { display: none; }
     </style>
 </head>
 <body>
     <div class="app-container">
-        <h1>Analyse Morphologique</h1>
+        <img src="ton-logo.png" class="logo" alt="Logo">
+        
         <div id="step1">
-            <input type="number" id="testeurId" placeholder="N° du testeur" inputmode="numeric">
+            <h1>Analyse Morphologique</h1>
+            <input type="number" id="testeurId" placeholder="N° Testeur" inputmode="numeric">
             <input type="number" id="stature" placeholder="Stature (cm)" inputmode="numeric">
-            <button onclick="document.getElementById('cameraInput').click()">DÉMARRER LA CAPTURE</button>
-            <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none">
+            <button onclick="startCapture()">Démarrer</button>
+        </div>
+
+        <div id="step2" class="hidden">
+            <h2 id="captureLabel">Capture : Face</h2>
+            <input type="file" id="cameraInput" accept="image/*" style="display:none">
+            <button onclick="document.getElementById('cameraInput').click()">Ouvrir Appareil Photo</button>
+            <div class="capture-zone" id="captureZone">
+                <img id="previewImg" src="">
+                <div id="blackSquare"></div>
+            </div>
+            <button id="btnNext" class="hidden" onclick="processAndNext()">Valider et Suivant</button>
+        </div>
+
+        <div id="step3" class="hidden">
+            <h2>Validation Finale</h2>
+            <div class="photo-grid" id="photoGrid"></div>
+            <button onclick="sendData()">Enregistrer les données</button>
         </div>
     </div>
+
+    <script>
+        let currentStep = 0;
+        const steps = ['Face', 'Profil', 'Dos'];
+        const finalData = { photos: [], stature: 0 };
+
+        function startCapture() {
+            const st = document.getElementById('stature').value;
+            if(!st) return alert("Stature requise.");
+            finalData.stature = st;
+            document.getElementById('step1').classList.add('hidden');
+            document.getElementById('step2').classList.remove('hidden');
+        }
+
+        document.getElementById('cameraInput').addEventListener('change', function(e) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                document.getElementById('previewImg').src = event.target.result;
+                document.getElementById('captureZone').style.display = 'block';
+                document.getElementById('blackSquare').style.display = 'block';
+                document.getElementById('btnNext').classList.remove('hidden');
+            }
+            reader.readAsDataURL(e.target.files[0]);
+        });
+
+        function processAndNext() {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const img = document.getElementById('previewImg');
+            
+            canvas.width = 1200;
+            canvas.height = (img.naturalHeight / img.naturalWidth) * 1200;
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            
+            // Appliquer le masque fixe (calculé en pourcentage de l'image)
+            ctx.fillStyle = 'black';
+            ctx.fillRect(canvas.width * 0.4, canvas.height * 0.15, canvas.width * 0.2, canvas.height * 0.15);
+            
+            finalData.photos.push(canvas.toDataURL('image/jpeg', 0.8));
+
+            currentStep++;
+            if(currentStep < 3) {
+                document.getElementById('captureLabel').innerText = "Capture : " + steps[currentStep];
+                document.getElementById('captureZone').style.display = 'none';
+                document.getElementById('btnNext').classList.add('hidden');
+            } else {
+                document.getElementById('step2').classList.add('hidden');
+                document.getElementById('step3').classList.remove('hidden');
+                finalData.photos.forEach(p => {
+                    const i = document.createElement('img'); i.src = p; document.getElementById('photoGrid').appendChild(i);
+                });
+            }
+        }
+
+        function sendData() {
+            console.log("Données prêtes pour analyse :", finalData);
+            alert("Données enregistrées avec succès pour analyse.");
+        }
+    </script>
 </body>
 </html>
