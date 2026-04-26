@@ -2,246 +2,230 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Atelier Audace - Calibration</title>
     <link href="https://fonts.googleapis.com/css2?family=Allura&family=Montserrat:wght@300&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --sable: #E5D0BA;
-            --noir: #1A1A1A;
-            --indigo: #004D99;
-        }
-
-        body {
-            background-color: var(--sable);
-            color: var(--noir);
-            font-family: 'Montserrat', sans-serif;
-            font-weight: 300;
-            margin: 0;
+        :root { --sable: #E5D0BA; --noir: #1A1A1A; --indigo: #004D99; }
+        
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
+        body { 
+            background-color: var(--sable); 
+            color: var(--noir); 
+            font-family: 'Montserrat', sans-serif; 
+            margin: 0; 
+            padding: 0;
             display: flex;
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
         }
 
-        h1 {
-            font-family: 'Allura', cursive;
-            font-size: 3.5rem;
-            margin: 20px 0 10px 0;
-            color: var(--noir);
-        }
+        h1 { font-family: 'Allura', cursive; font-size: 3.5rem; margin: 20px 0 5px; }
+        p.subtitle { margin-bottom: 30px; font-size: 0.9rem; letter-spacing: 2px; text-transform: uppercase; }
 
-        .container {
-            width: 90%;
-            max-width: 500px;
-            text-align: center;
-            padding-bottom: 50px;
-        }
+        .container { width: 90%; max-width: 450px; text-align: center; }
 
-        .btn {
-            background-color: var(--indigo);
-            color: white;
-            border: none;
-            padding: 15px 25px;
+        input { 
+            width: 100%; padding: 15px; margin: 10px 0; 
+            border: 1px solid var(--indigo); 
+            background: rgba(255,255,255,0.2);
             font-family: 'Montserrat', sans-serif;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            cursor: pointer;
-            width: 100%;
-            margin-top: 15px;
-            transition: 0.3s;
         }
 
-        .btn-secondary { background-color: var(--noir); }
-        .btn:disabled { opacity: 0.5; }
+        .btn { 
+            background: var(--indigo); color: white; border: none; 
+            padding: 18px; width: 100%; cursor: pointer; 
+            font-family: 'Montserrat', sans-serif; font-weight: bold;
+            text-transform: uppercase; margin-top: 15px;
+            transition: transform 0.1s;
+        }
+        .btn:active { transform: scale(0.98); }
 
-        input {
-            width: 100%;
-            padding: 12px;
-            margin: 10px 0;
-            border: 1px solid var(--indigo);
-            background: rgba(255, 255, 255, 0.3);
-            box-sizing: border-box;
+        /* Zone de Calibration */
+        #calibration-zone { 
+            position: relative; width: 100%; margin-top: 20px;
+            border: 3px solid var(--indigo); background: #000;
+            display: none; touch-action: none; 
+        }
+        #photo-canvas { width: 100%; display: block; }
+
+        .line { 
+            position: absolute; left: 0; width: 100%; height: 3px; 
+            background: var(--indigo); z-index: 10;
+        }
+        .line::before {
+            content: ""; position: absolute; top: -15px; left: 50%; 
+            transform: translateX(-50%); width: 40px; height: 30px;
+            background: var(--indigo); border-radius: 5px;
+        }
+        .line::after {
+            content: "↕"; position: absolute; top: -15px; left: 50%;
+            transform: translateX(-50%); color: white; font-weight: bold;
         }
 
-        /* Caméra et Repères */
-        #camera-wrapper {
-            position: relative;
-            width: 100%;
-            aspect-ratio: 3/4;
-            background: #000;
-            border: 4px solid var(--indigo);
-            overflow: hidden;
-            display: none;
+        /* Galerie de fin */
+        #gallery { 
+            display: grid; grid-template-columns: repeat(3, 1fr); 
+            gap: 10px; margin: 20px 0; 
         }
-
-        video { width: 100%; height: 100%; object-fit: cover; }
-
-        .guide-line {
-            position: absolute;
-            left: 0;
-            width: 100%;
-            height: 2px;
-            background-color: var(--indigo);
-            z-index: 10;
-            box-shadow: 0 0 8px rgba(0,77,153,0.8);
-        }
-
-        #guide-head { top: 15%; }
-        #guide-feet { bottom: 10%; }
-
-        .guide-label {
-            position: absolute;
-            color: var(--indigo);
-            font-size: 10px;
-            font-weight: bold;
-            right: 10px;
-            background: var(--sable);
-            padding: 2px 5px;
-        }
-
-        /* Galerie de validation */
-        #gallery {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 10px;
-            margin-top: 20px;
-        }
-
-        .thumb-container {
-            font-size: 10px;
-            text-transform: uppercase;
-        }
-
-        .thumb-container canvas {
-            width: 100%;
-            border: 1px solid var(--indigo);
-            background: #fff;
-        }
+        .thumb-box { font-size: 0.7rem; font-weight: bold; }
+        .thumb-box img { width: 100%; border: 1px solid var(--indigo); background: white; }
 
         .hidden { display: none !important; }
+        .step-info { background: var(--noir); color: white; padding: 10px; margin-top: 10px; font-size: 0.8rem; }
     </style>
 </head>
 <body>
 
-    <div class="container" id="screen-welcome">
+    <div id="screen-1" class="container">
         <h1>Atelier Audace</h1>
-        <p>Expert Technique : Calibration Morphologique</p>
-        <input type="text" id="input-id" placeholder="ID TESTEUR (ex: IDTEST_001)">
-        <input type="number" id="input-stature" placeholder="STATURE EN CM (ex: 175)">
-        <button class="btn" onclick="goToCamera()">Commencer la capture</button>
+        <p class="subtitle">Calibration Phase Test</p>
+        <input type="text" id="client-id" placeholder="NUMÉRO TESTEUR">
+        <input type="number" id="stature" placeholder="STATURE (CM)">
+        <p id="view-label" style="font-weight: bold; margin-top: 20px;">Vue actuelle : FACE</p>
+        <input type="file" id="file-input" accept="image/*" capture="environment" class="hidden">
+        <button class="btn" onclick="document.getElementById('file-input').click()">Prendre la photo</button>
     </div>
 
-    <div class="container hidden" id="screen-capture">
-        <h2 id="capture-title">Vue de Face</h2>
-        <div id="camera-wrapper">
-            <video id="video" autoplay playsinline></video>
-            <div id="guide-head" class="guide-line"><span class="guide-label" style="top:-15px">SOMMET CRÂNE</span></div>
-            <div id="guide-feet" class="guide-line"><span class="guide-label" style="top:2px">BASE PIEDS</span></div>
+    <div id="screen-2" class="container hidden">
+        <p>Glissez les lignes sur le <b>sommet du crâne</b> et les <b>talons</b>.</p>
+        <div id="calibration-zone">
+            <canvas id="photo-canvas"></canvas>
+            <div id="line-head" class="line" style="top: 20%;"></div>
+            <div id="line-feet" class="line" style="top: 80%;"></div>
         </div>
-        <button class="btn" onclick="capturePhoto()">Prendre la photo</button>
-        <p style="font-size: 12px;">Alignez le sommet du crâne et les pieds sur les lignes Indigo.</p>
+        <button class="btn" onclick="processAndSave()">Valider cette vue</button>
     </div>
 
-    <div class="container hidden" id="screen-validation">
+    <div id="screen-3" class="container hidden">
         <h1>Validation</h1>
-        <p>Vérifiez l'anonymat et l'alignement des repères avant l'envoi final.</p>
-        <div id="gallery">
-            <div class="thumb-container"><span>Face</span><canvas id="prev-Face"></canvas></div>
-            <div class="thumb-container"><span>Profil</span><canvas id="prev-Profil"></canvas></div>
-            <div class="thumb-container"><span>Dos</span><canvas id="prev-Dos"></canvas></div>
-        </div>
-        <button class="btn" onclick="sendToSheet()">Confirmer et Envoyer</button>
-        <button class="btn btn-secondary" onclick="resetCapture()">Tout recommencer</button>
+        <p>Vos 3 photos avec repères et floutage :</p>
+        <div id="gallery"></div>
+        <div class="step-info">Ces photos seront envoyées sur le Drive sécurisé.</div>
+        <button class="btn" onclick="uploadToServer()">Confirmer l'envoi</button>
+        <button class="btn" style="background:var(--noir)" onclick="location.reload()">Recommencer</button>
     </div>
 
     <script>
-        let currentView = 0;
         const views = ['Face', 'Profil', 'Dos'];
-        const capturedData = {};
-        const video = document.getElementById('video');
+        let currentIdx = 0;
+        let originalImg = new Image();
+        let finalImages = [];
+        const scriptURL = 'VOTRE_URL_GOOGLE_APPS_SCRIPT_ICI'; // À remplacer après déploiement
 
-        async function goToCamera() {
-            const id = document.getElementById('input-id').value;
-            const stature = document.getElementById('input-stature').value;
-            if(!id || !stature) return alert("Veuillez remplir vos informations.");
+        // Gérer la prise de photo
+        document.getElementById('file-input').onchange = function(e) {
+            const reader = new FileReader();
+            reader.onload = (f) => {
+                originalImg.onload = () => {
+                    document.getElementById('screen-1').classList.add('hidden');
+                    document.getElementById('screen-2').classList.remove('hidden');
+                    initCalibration();
+                };
+                originalImg.src = f.target.result;
+            };
+            reader.readAsDataURL(e.target.files[0]);
+        };
+
+        function initCalibration() {
+            const canvas = document.getElementById('photo-canvas');
+            const zone = document.getElementById('calibration-zone');
+            zone.style.display = 'block';
             
-            document.getElementById('screen-welcome').classList.add('hidden');
-            document.getElementById('screen-capture').classList.remove('hidden');
-            document.getElementById('camera-wrapper').style.display = 'block';
+            // Adapter le canvas à l'image
+            canvas.width = originalImg.width;
+            canvas.height = originalImg.height;
+            canvas.getContext('2d').drawImage(originalImg, 0, 0);
 
-            const stream = await navigator.mediaDevices.getUserMedia({ 
-                video: { facingMode: "environment", width: { ideal: 1080 }, height: { ideal: 1920 } }, 
-                audio: false 
-            });
-            video.srcObject = stream;
+            // Rendre les lignes tactiles
+            setupDraggable(document.getElementById('line-head'));
+            setupDraggable(document.getElementById('line-feet'));
         }
 
-        function capturePhoto() {
-            const tempCanvas = document.createElement('canvas');
-            tempCanvas.width = video.videoWidth;
-            tempCanvas.height = video.videoHeight;
-            const ctx = tempCanvas.getContext('2d');
-            
-            // 1. Dessiner le sujet
-            ctx.drawImage(video, 0, 0, tempCanvas.width, tempCanvas.height);
-            
-            // 2. Appliquer le flou d'anonymat (Zone visage : environ 15% à 30% de la hauteur)
-            const blurY = tempCanvas.height * 0.16;
-            const blurH = tempCanvas.height * 0.12;
+        function setupDraggable(el) {
+            el.ontouchmove = (e) => {
+                e.preventDefault();
+                let rect = document.getElementById('calibration-zone').getBoundingClientRect();
+                let y = (e.touches[0].clientY - rect.top) / rect.height * 100;
+                if(y >= 0 && y <= 100) el.style.top = y + '%';
+            };
+        }
+
+        function processAndSave() {
+            const canvas = document.getElementById('photo-canvas');
+            const ctx = canvas.getContext('2d');
+            const headY = (parseFloat(document.getElementById('line-head').style.top) / 100) * canvas.height;
+            const feetY = (parseFloat(document.getElementById('line-feet').style.top) / 100) * canvas.height;
+
+            // 1. ANONYMAT : Floutage relatif à la ligne de tête
             ctx.save();
-            ctx.filter = 'blur(30px)';
-            ctx.drawImage(tempCanvas, 0, blurY, tempCanvas.width, blurH, 0, blurY, tempCanvas.width, blurH);
+            ctx.filter = 'blur(50px)';
+            // On floute un rectangle sous la ligne de tête (visage)
+            const blurHeight = canvas.height * 0.15;
+            ctx.drawImage(canvas, 0, headY + 10, canvas.width, blurHeight, 0, headY + 10, canvas.width, blurHeight);
             ctx.restore();
 
-            // 3. Dessiner les lignes de repère définitives (Indigo) pour l'IA
+            // 2. MARQUAGE INDIGO (Repères pour l'expert)
             ctx.strokeStyle = "#004D99";
-            ctx.lineWidth = 5;
-            // Ligne tête
-            ctx.beginPath();
-            ctx.moveTo(0, tempCanvas.height * 0.15);
-            ctx.lineTo(tempCanvas.width, tempCanvas.height * 0.15);
-            ctx.stroke();
-            // Ligne pieds
-            ctx.beginPath();
-            ctx.moveTo(0, tempCanvas.height * 0.90);
-            ctx.lineTo(tempCanvas.width, tempCanvas.height * 0.90);
-            ctx.stroke();
+            ctx.lineWidth = canvas.width * 0.015;
+            ctx.beginPath(); ctx.moveTo(0, headY); ctx.lineTo(canvas.width, headY); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(0, feetY); ctx.lineTo(canvas.width, feetY); ctx.stroke();
 
-            // Stocker et afficher la miniature
-            const label = views[currentView];
-            capturedData[label] = tempCanvas.toDataURL('image/jpeg', 0.8);
-            
-            const prevCanvas = document.getElementById('prev-' + label);
-            const pCtx = prevCanvas.getContext('2d');
-            prevCanvas.width = 300; prevCanvas.height = 400;
-            pCtx.drawImage(tempCanvas, 0, 0, 300, 400);
+            // Sauvegarde
+            finalImages.push({
+                view: views[currentIdx],
+                data: canvas.toDataURL('image/jpeg', 0.6)
+            });
 
-            currentView++;
-            if(currentView < 3) {
-                document.getElementById('capture-title').innerText = "Vue de " + views[currentView];
+            currentIdx++;
+            if(currentIdx < 3) {
+                document.getElementById('view-label').innerText = "Vue actuelle : " + views[currentIdx].toUpperCase();
+                document.getElementById('screen-2').classList.add('hidden');
+                document.getElementById('screen-1').classList.remove('hidden');
             } else {
-                showValidation();
+                showGallery();
             }
         }
 
-        function showValidation() {
-            document.getElementById('screen-capture').classList.add('hidden');
-            document.getElementById('screen-validation').classList.remove('hidden');
-            if (video.srcObject) {
-                video.srcObject.getTracks().forEach(track => track.stop());
+        function showGallery() {
+            document.getElementById('screen-2').classList.add('hidden');
+            document.getElementById('screen-3').classList.remove('hidden');
+            const gal = document.getElementById('gallery');
+            finalImages.forEach(imgObj => {
+                const div = document.createElement('div');
+                div.className = "thumb-box";
+                div.innerHTML = `<span>${imgObj.view}</span><img src="${imgObj.data}">`;
+                gal.appendChild(div);
+            });
+        }
+
+        async function uploadToServer() {
+            const id = document.getElementById('client-id').value;
+            const stature = document.getElementById('stature').value;
+            
+            alert("Envoi en cours vers l'Atelier Audace...");
+            
+            const payload = {
+                id_testeur: id,
+                stature: stature,
+                photoFace: finalImages[0].data,
+                photoProfil: finalImages[1].data,
+                photoDos: finalImages[2].data
+            };
+
+            try {
+                const response = await fetch(scriptURL, {
+                    method: 'POST',
+                    mode: 'no-cors', // Important pour Google Apps Script
+                    body: JSON.stringify(payload)
+                });
+                alert("Données transmises avec succès ! Merci de votre contribution.");
+                location.reload();
+            } catch (e) {
+                alert("Erreur de connexion. Vérifiez l'URL du script.");
             }
-        }
-
-        function resetCapture() {
-            currentView = 0;
-            document.getElementById('screen-validation').classList.add('hidden');
-            document.getElementById('screen-welcome').classList.remove('hidden');
-        }
-
-        function sendToSheet() {
-            alert("Transfert sécurisé vers le Google Sheet 'Audace Test' en cours...");
-            // La logique fetch vers Code.gs sera intégrée après validation de cet écran.
         }
     </script>
 </body>
