@@ -1,220 +1,53 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Atelier Audace - Calibration</title>
-    <link href="https://fonts.googleapis.com/css2?family=Allura&family=Montserrat:wght@300;600&display=swap" rel="stylesheet">
-    <style>
-        :root { --sable: #E5D0BA; --noir: #1A1A1A; --indigo: #004D99; }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        
-        body { 
-            background-color: var(--sable); color: var(--noir); 
-            font-family: 'Montserrat', sans-serif; margin: 0; padding: 0;
-            display: flex; flex-direction: column; align-items: center; min-height: 100vh;
-        }
+function doPost(e) {
+  try {
+    var data = JSON.parse(e.postData.contents);
+    
+    // 1. IDENTIFICATION DU TABLEAU
+    var ss = SpreadsheetApp.openById("1s890CM3o2X7Hv_QGggmO7pjMnBdmdss59WMEvcjcEi8");
+    
+    // 2. CIBLAGE PRÉCIS DE L'ONGLET
+    var sheet = ss.getSheetByName("Collecte_tests_morpho");
+    
+    if (!sheet) {
+      // Sécurité : si l'onglet est mal nommé, on crée une erreur visible dans les logs
+      throw new Error("L'onglet 'Collecte_tests_morpho' est introuvable.");
+    }
+    
+    // 3. IDENTIFICATION DU DOSSIER DRIVE
+    var folder = DriveApp.getFolderById("1Z84CydtYoMR5XTVJ8k2nfNTZ1h54X90F");
+    
+    var labels = ["Face", "Profil", "Dos"];
+    var photos = [data.photoFace, data.photoProfil, data.photoDos];
+    var urls = [];
 
-        .container { width: 90%; max-width: 450px; text-align: center; padding: 20px 0; }
-        h1 { font-family: 'Allura', cursive; font-size: 3.5rem; margin: 10px 0; }
-        p.subtitle { margin-bottom: 25px; font-size: 0.8rem; letter-spacing: 2px; text-transform: uppercase; font-weight: 600; }
+    // 4. ENREGISTREMENT DES PHOTOS
+    for (var i = 0; i < 3; i++) {
+      var contentType = photos[i].split(",")[0].split(":")[1].split(";")[0];
+      var bytes = Utilities.base64Decode(photos[i].split(",")[1]);
+      var fileName = "IDTEST_" + data.id_testeur + "_" + labels[i] + ".jpg";
+      
+      var blob = Utilities.newBlob(bytes, contentType, fileName);
+      var file = folder.createFile(blob);
+      
+      // Accès public pour la lecture par l'IA
+      file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+      urls.push(file.getUrl());
+    }
 
-        input { 
-            width: 100%; padding: 15px; margin: 10px 0; border: 2px solid var(--indigo); 
-            background: rgba(255,255,255,0.4); font-family: 'Montserrat', sans-serif; font-size: 1rem;
-        }
+    // 5. AJOUT DE LA LIGNE DANS LE TABLEAU
+    // Ordre : ID Testeur | Date | Stature | Photo Face | Photo Profil | Photo Dos
+    sheet.appendRow([
+      data.id_testeur, 
+      new Date(), 
+      data.stature, 
+      urls[0], 
+      urls[1], 
+      urls[2]
+    ]);
 
-        .btn { 
-            background: var(--indigo); color: white; border: none; padding: 18px; 
-            width: 100%; cursor: pointer; font-family: 'Montserrat', sans-serif; 
-            font-weight: 600; text-transform: uppercase; margin-top: 15px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-        .btn:disabled { background: #666; cursor: not-allowed; }
-
-        /* Interface de Calibration */
-        #calibration-zone { 
-            position: relative; width: 100%; margin-top: 20px;
-            border: 4px solid var(--indigo); background: #000; display: none; touch-action: none; 
-        }
-        #photo-canvas { width: 100%; display: block; }
-        
-        .line { position: absolute; left: 0; width: 100%; height: 4px; background: var(--indigo); z-index: 10; }
-        .line::after {
-            content: "↔"; position: absolute; top: -18px; left: 50%; transform: translateX(-50%);
-            background: var(--indigo); color: white; padding: 2px 15px; border-radius: 20px; font-weight: bold;
-        }
-
-        /* Galerie */
-        #gallery { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 20px 0; }
-        .thumb-box { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; }
-        .thumb-box img { width: 100%; border: 2px solid var(--indigo); margin-top: 5px; }
-
-        .hidden { display: none !important; }
-        .loader { color: var(--indigo); font-weight: 600; margin-top: 20px; animation: blink 1s infinite; }
-        @keyframes blink { 0% {opacity:1} 50% {opacity:0.3} 100% {opacity:1} }
-    </style>
-</head>
-<body>
-
-    <div id="screen-1" class="container">
-        <h1>Atelier Audace</h1>
-        <p class="subtitle">Collecte Morphologique</p>
-        <input type="text" id="client-id" placeholder="ID TESTEUR (ex: ID001)">
-        <input type="number" id="stature" placeholder="STATURE DU CLIENT (CM)">
-        <div style="margin-top: 30px;">
-            <p id="view-label" style="font-weight: 600; color: var(--indigo);">VUE À CAPTURER : <span id="current-view-name">FACE</span></p>
-            <input type="file" id="file-input" accept="image/*" capture="environment" class="hidden">
-            <button class="btn" onclick="document.getElementById('file-input').click()">Ouvrir l'appareil photo</button>
-        </div>
-    </div>
-
-    <div id="screen-2" class="container hidden">
-        <p>Positionnez les lignes Indigo sur le <b>Sommet du Crâne</b> et les <b>Talons</b>.</p>
-        <div id="calibration-zone">
-            <canvas id="photo-canvas"></canvas>
-            <div id="line-head" class="line" style="top: 20%;"></div>
-            <div id="line-feet" class="line" style="top: 80%;"></div>
-        </div>
-        <button class="btn" onclick="processAndSave()">Valider cette vue</button>
-    </div>
-
-    <div id="screen-3" class="container hidden">
-        <h1>Validation</h1>
-        <p>Vérifiez vos 3 clichés floutés avant l'envoi au système Audace.</p>
-        <div id="gallery"></div>
-        <div id="upload-status" class="hidden loader">TRANSMISSION EN COURS...</div>
-        <button id="final-btn" class="btn" onclick="uploadToServer()">Confirmer et Envoyer</button>
-        <button class="btn" style="background:var(--noir); margin-top: 10px;" onclick="location.reload()">Annuler / Recommencer</button>
-    </div>
-
-    <script>
-        const scriptURL = 'https://script.google.com/macros/s/AKfycbz_byaibLRE1GEDDGWeiAoQgFx0cSsEJ9IifZxuEIpGT2fwW7OARcEhMd3w7pDZz2IF/exec';
-        const views = ['Face', 'Profil', 'Dos'];
-        let currentIdx = 0;
-        let originalImg = new Image();
-        let finalImages = [];
-
-        // Gestionnaire de fichier
-        document.getElementById('file-input').onchange = function(e) {
-            if(!e.target.files[0]) return;
-            const reader = new FileReader();
-            reader.onload = (f) => {
-                originalImg.onload = () => {
-                    document.getElementById('screen-1').classList.add('hidden');
-                    document.getElementById('screen-2').classList.remove('hidden');
-                    startCalibration();
-                };
-                originalImg.src = f.target.result;
-            };
-            reader.readAsDataURL(e.target.files[0]);
-        };
-
-        function startCalibration() {
-            const canvas = document.getElementById('photo-canvas');
-            const zone = document.getElementById('calibration-zone');
-            zone.style.display = 'block';
-            
-            // On garde la résolution d'origine pour la précision IA
-            canvas.width = originalImg.width;
-            canvas.height = originalImg.height;
-            canvas.getContext('2d').drawImage(originalImg, 0, 0);
-
-            initDraggable(document.getElementById('line-head'));
-            initDraggable(document.getElementById('line-feet'));
-        }
-
-        function initDraggable(el) {
-            el.ontouchmove = (e) => {
-                e.preventDefault();
-                let rect = document.getElementById('calibration-zone').getBoundingClientRect();
-                let y = (e.touches[0].clientY - rect.top) / rect.height * 100;
-                if(y >= 0 && y <= 100) el.style.top = y + '%';
-            };
-        }
-
-        function processAndSave() {
-            const canvas = document.getElementById('photo-canvas');
-            const ctx = canvas.getContext('2d');
-            const headY = (parseFloat(document.getElementById('line-head').style.top) / 100) * canvas.height;
-            const feetY = (parseFloat(document.getElementById('line-feet').style.top) / 100) * canvas.height;
-
-            // 1. FLOUTAGE ANONYMAT (Basé sur la ligne de tête)
-            ctx.save();
-            ctx.filter = 'blur(60px)';
-            const faceAreaHeight = canvas.height * 0.15; // Zone fixe sous le crâne
-            ctx.drawImage(canvas, 0, headY + 5, canvas.width, faceAreaHeight, 0, headY + 5, canvas.width, faceAreaHeight);
-            ctx.restore();
-
-            // 2. TRACÉ DES REPÈRES (Indigo)
-            ctx.strokeStyle = "#004D99";
-            ctx.lineWidth = canvas.width * 0.015;
-            // Ligne Crâne
-            ctx.beginPath(); ctx.moveTo(0, headY); ctx.lineTo(canvas.width, headY); ctx.stroke();
-            // Ligne Talons
-            ctx.beginPath(); ctx.moveTo(0, feetY); ctx.lineTo(canvas.width, feetY); ctx.stroke();
-
-            // Stockage de l'image traitée
-            finalImages.push({ 
-                view: views[currentIdx], 
-                data: canvas.toDataURL('image/jpeg', 0.6) 
-            });
-
-            currentIdx++;
-            if(currentIdx < 3) {
-                document.getElementById('current-view-name').innerText = views[currentIdx].toUpperCase();
-                document.getElementById('screen-2').classList.add('hidden');
-                document.getElementById('screen-1').classList.remove('hidden');
-                document.getElementById('file-input').value = ""; // Clear file
-            } else {
-                renderGallery();
-            }
-        }
-
-        function renderGallery() {
-            document.getElementById('screen-2').classList.add('hidden');
-            document.getElementById('screen-3').classList.remove('hidden');
-            const gal = document.getElementById('gallery');
-            finalImages.forEach(imgObj => {
-                const div = document.createElement('div');
-                div.className = "thumb-box";
-                div.innerHTML = `<span>${imgObj.view}</span><img src="${imgObj.data}">`;
-                gal.appendChild(div);
-            });
-        }
-
-        function uploadToServer() {
-            const id = document.getElementById('client-id').value;
-            const stature = document.getElementById('stature').value;
-            if(!id || !stature) return alert("Données incomplètes.");
-
-            document.getElementById('upload-status').classList.remove('hidden');
-            document.getElementById('final-btn').disabled = true;
-
-            const payload = {
-                id_testeur: id,
-                stature: stature,
-                photoFace: finalImages[0].data,
-                photoProfil: finalImages[1].data,
-                photoDos: finalImages[2].data
-            };
-
-            fetch(scriptURL, {
-                method: 'POST',
-                mode: 'no-cors',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            })
-            .then(() => {
-                alert("Données envoyées avec succès ! Le Sheet Audace va traiter vos mesures.");
-                location.reload();
-            })
-            .catch(err => {
-                alert("Erreur réseau : " + err);
-                document.getElementById('final-btn').disabled = false;
-                document.getElementById('upload-status').classList.add('hidden');
-            });
-        }
-    </script>
-</body>
-</html>
+    return ContentService.createTextOutput("Success").setMimeType(ContentService.MimeType.TEXT);
+    
+  } catch (err) {
+    return ContentService.createTextOutput("Erreur: " + err.toString()).setMimeType(ContentService.MimeType.TEXT);
+  }
+}
