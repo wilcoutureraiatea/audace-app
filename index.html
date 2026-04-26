@@ -4,182 +4,168 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Atelier Audace - Calibration</title>
-    <link href="https://fonts.googleapis.com/css2?family=Allura&family=Montserrat:wght@300;400;700&display=swap" rel="stylesheet">
     <style>
-        /* Charte Graphique Appliquée */
-        body { background-color: #E5D0BA; color: #1A1A1A; font-family: 'Montserrat', sans-serif; display: flex; justify-content: center; padding: 20px; margin: 0; }
-        .app-container { width: 100%; max-width: 600px; background: #ffffff; padding: 30px; border-radius: 12px; color: #1A1A1A; box-shadow: 0 4px 15px rgba(0,0,0,0.1); position: relative; }
+        /* Charte Graphique : Anthracite et Sobriété */
+        body { 
+            background-color: #1a1a1a; 
+            color: #ffffff; 
+            font-family: 'Helvetica Neue', Arial, sans-serif; 
+            display: flex; 
+            justify-content: center; 
+            padding: 20px; 
+            margin: 0; 
+        }
+        .app-container { 
+            width: 100%; 
+            max-width: 600px; 
+            background: #ffffff; 
+            padding: 30px; 
+            border-radius: 12px; 
+            color: #333; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3); 
+        }
+        .logo { width: 140px; display: block; margin: 0 auto 25px auto; }
+        h1, h2 { text-align: center; color: #1a1a1a; margin-bottom: 25px; }
         
-        /* Logo & Titres */
-        .logo { width: 150px; height: auto; display: block; margin: 0 auto 20px auto; }
-        h1, h2 { text-align: center; font-family: 'Allura', cursive; color: #1A1A1A; margin-bottom: 20px; }
+        /* Champs de saisie : Cadre blanc épuré */
+        input { 
+            width: 100%; 
+            padding: 18px; 
+            margin: 12px 0; 
+            border: 1px solid #e0e0e0; 
+            border-radius: 8px; 
+            box-sizing: border-box; 
+            font-size: 16px; 
+            background: #fcfcfc;
+        }
         
-        /* Formulaire */
-        input { width: 100%; padding: 15px; margin: 10px 0; border: 1px solid #1A1A1A; border-radius: 8px; box-sizing: border-box; font-size: 16px; font-family: 'Montserrat', sans-serif; }
-        
-        /* Boutons (Indigo Tropical #004D99) */
-        button { width: 100%; padding: 18px; margin-top: 15px; background-color: #004D99; color: #ffffff; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px; font-family: 'Montserrat', sans-serif; }
-        button:hover { background-color: #003366; }
-        button:disabled { background-color: #ccc; }
-        .btn-capture { background-color: #1A1A1A; } 
+        /* Boutons : Structurels et nets */
+        button { 
+            width: 100%; 
+            padding: 18px; 
+            margin-top: 20px; 
+            background: #1a1a1a; 
+            color: #fff; 
+            border: none; 
+            border-radius: 8px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            font-size: 16px; 
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
 
-        /* Zone de capture et Masque (Technique préservée) */
-        .capture-zone { position: relative; width: 100%; margin-top: 15px; overflow: hidden; border-radius: 8px; border: 2px solid #1A1A1A; background: #000; display: none;}
+        /* Zone de capture */
+        .capture-zone { position: relative; width: 100%; margin-top: 20px; border-radius: 8px; border: 2px solid #1a1a1a; background: #000; display: none; }
         #previewImg { width: 100%; display: block; }
-        #blackSquare { position: absolute; width: 60px; height: 60px; background-color: black; border: 2px solid white; cursor: move; touch-action: none; top: 10px; left: 10px; box-sizing: border-box; display: none; z-index: 10;}
-
-        /* Grille de validation */
+        
+        /* Carré noir de masquage */
+        #blackSquare { position: absolute; width: 80px; height: 80px; background-color: black; border: 2px solid white; cursor: move; touch-action: none; top: 20px; left: 20px; z-index: 10; display: none; }
+        
         .photo-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 20px; }
-        .photo-grid img { width: 100%; border-radius: 8px; border: 2px solid #1A1A1A; }
+        .photo-grid img { width: 100%; border-radius: 8px; border: 2px solid #ccc; }
         .hidden { display: none; }
     </style>
 </head>
 <body>
     <div class="app-container">
-        <img src="votre-logo.png" alt="Atelier Audace" class="logo">
+        <img src="ton-logo.png" class="logo" alt="Logo Atelier">
         
         <div id="step1">
             <h1>Analyse Morphologique</h1>
-            <input type="number" id="testeurId" placeholder="N° du testeur" inputmode="numeric" pattern="[0-9]*">
-            <input type="number" id="stature" placeholder="Stature (cm)" inputmode="numeric" pattern="[0-9]*">
+            <input type="number" id="testeurId" placeholder="N° du testeur" inputmode="numeric">
+            <input type="number" id="stature" placeholder="Stature (cm)" inputmode="numeric">
             <button onclick="startCapture()">Démarrer la capture</button>
         </div>
 
         <div id="step2" class="hidden">
             <h2 id="captureLabel">Capture : Face</h2>
-            <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none">
-            <button id="btnCapture" class="btn-capture" onclick="document.getElementById('cameraInput').click()">Ouvrir l'appareil photo</button>
+            <input type="file" id="cameraInput" accept="image/*" style="display:none">
+            <button id="btnCapture" onclick="document.getElementById('cameraInput').click()">Ouvrir l'appareil photo</button>
             <div class="capture-zone" id="captureZone">
-                <img id="previewImg" src="" alt="Prévisualisation">
+                <img id="previewImg" src="">
                 <div id="blackSquare"></div>
             </div>
             <button id="btnNext" class="hidden" onclick="processAndNext()">Valider le masquage</button>
         </div>
 
         <div id="step3" class="hidden">
-            <h2>Validation des photos</h2>
+            <h2>Validation finale</h2>
             <div class="photo-grid" id="photoGrid"></div>
             <button onclick="sendData()">Envoyer au système</button>
-            <button onclick="location.reload()" style="background:#cc0000;">Recommencer</button>
         </div>
     </div>
 
     <script>
         let currentStep = 0;
         const steps = ['Face', 'Profil', 'Dos'];
-        const finalPhotos = []; 
-        const cameraInput = document.getElementById('cameraInput');
-        const previewImg = document.getElementById('previewImg');
-        const blackSquare = document.getElementById('blackSquare');
-        const captureZone = document.getElementById('captureZone');
-        const btnNext = document.getElementById('btnNext');
-        const btnCapture = document.getElementById('btnCapture');
-
-        let isDragging = false;
-        let startX, startY, initialLeft, initialTop;
+        const finalPhotos = [];
 
         function startCapture() {
-            const id = document.getElementById('testeurId').value;
-            const size = document.getElementById('stature').value;
-            if(!id || !size) return alert("Veuillez remplir le N° de testeur et la stature.");
+            if(!document.getElementById('testeurId').value || !document.getElementById('stature').value) return alert("Veuillez saisir les informations.");
             document.getElementById('step1').classList.add('hidden');
             document.getElementById('step2').classList.remove('hidden');
         }
 
-        cameraInput.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (!file) return;
+        // Gestion de la capture photo
+        document.getElementById('cameraInput').addEventListener('change', function(e) {
             const reader = new FileReader();
             reader.onload = function(event) {
-                previewImg.src = event.target.result;
-                captureZone.style.display = 'block';
-                blackSquare.style.display = 'block';
-                blackSquare.style.top = '10px';
-                blackSquare.style.left = '10px';
-                btnNext.classList.remove('hidden');
-                btnCapture.innerText = "Refaire la photo";
+                document.getElementById('previewImg').src = event.target.result;
+                document.getElementById('captureZone').style.display = 'block';
+                document.getElementById('blackSquare').style.display = 'block';
+                document.getElementById('btnNext').classList.remove('hidden');
             }
-            reader.readAsDataURL(file);
+            reader.readAsDataURL(e.target.files[0]);
         });
 
-        function startDrag(e) {
-            isDragging = true;
-            const clientX = e.type.startsWith('touch') ? e.touches[0].clientX : e.clientX;
-            const clientY = e.type.startsWith('touch') ? e.touches[0].clientY : e.clientY;
-            startX = clientX; startY = clientY;
-            initialLeft = blackSquare.offsetLeft; initialTop = blackSquare.offsetTop;
-            blackSquare.style.borderColor = '#00ff00';
-        }
-
-        function doDrag(e) {
-            if (!isDragging) return;
-            e.preventDefault();
-            const clientX = e.type.startsWith('touch') ? e.touches[0].clientX : e.clientX;
-            const clientY = e.type.startsWith('touch') ? e.touches[0].clientY : e.clientY;
-            const dx = clientX - startX; const dy = clientY - startY;
-            let newLeft = initialLeft + dx; let newTop = initialTop + dy;
-            const maxLeft = captureZone.offsetWidth - blackSquare.offsetWidth;
-            const maxTop = captureZone.offsetHeight - blackSquare.offsetHeight;
-            newLeft = Math.max(0, Math.min(newLeft, maxLeft));
-            newTop = Math.max(0, Math.min(newTop, maxTop));
-            blackSquare.style.left = newLeft + 'px';
-            blackSquare.style.top = newTop + 'px';
-        }
-
-        function endDrag() { isDragging = false; blackSquare.style.borderColor = 'white'; }
-
-        blackSquare.addEventListener('mousedown', startDrag);
-        window.addEventListener('mousemove', doDrag);
-        window.addEventListener('mouseup', endDrag);
-        blackSquare.addEventListener('touchstart', startDrag);
-        window.addEventListener('touchmove', doDrag, { passive: false });
-        window.addEventListener('touchend', endDrag);
-
+        // Traitement de l'image (Compression + Masquage)
         function processAndNext() {
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
-            canvas.width = previewImg.naturalWidth;
-            canvas.height = previewImg.naturalHeight;
-            ctx.drawImage(previewImg, 0, 0);
-            const scaleX = previewImg.naturalWidth / previewImg.offsetWidth;
-            const scaleY = previewImg.naturalHeight / previewImg.offsetHeight;
-            const rectX = blackSquare.offsetLeft * scaleX;
-            const rectY = blackSquare.offsetTop * scaleY;
-            const rectW = blackSquare.offsetWidth * scaleX;
-            const rectH = blackSquare.offsetHeight * scaleY;
+            const img = document.getElementById('previewImg');
+            
+            canvas.width = 1200;
+            canvas.height = (img.naturalHeight / img.naturalWidth) * 1200;
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            
+            const sq = document.getElementById('blackSquare');
+            const scaleX = canvas.width / img.offsetWidth;
+            const scaleY = canvas.height / img.offsetHeight;
             ctx.fillStyle = 'black';
-            ctx.fillRect(rectX, rectY, rectW, rectH);
+            ctx.fillRect(sq.offsetLeft * scaleX, sq.offsetTop * scaleY, sq.offsetWidth * scaleX, sq.offsetHeight * scaleY);
+            
             finalPhotos.push(canvas.toDataURL('image/jpeg', 0.8));
 
             currentStep++;
             if(currentStep < 3) {
                 document.getElementById('captureLabel').innerText = "Capture : " + steps[currentStep];
-                captureZone.style.display = 'none';
-                blackSquare.style.display = 'none';
-                btnNext.classList.add('hidden');
-                btnCapture.innerText = "Ouvrir l'appareil photo";
-                cameraInput.value = '';
+                document.getElementById('captureZone').style.display = 'none';
+                document.getElementById('btnNext').classList.add('hidden');
             } else {
-                showFinalValidation();
+                document.getElementById('step2').classList.add('hidden');
+                document.getElementById('step3').classList.remove('hidden');
+                finalPhotos.forEach(p => {
+                    const i = document.createElement('img'); i.src = p; document.getElementById('photoGrid').appendChild(i);
+                });
             }
         }
 
-        function showFinalValidation() {
-            document.getElementById('step2').classList.add('hidden');
-            document.getElementById('step3').classList.remove('hidden');
-            const grid = document.getElementById('photoGrid');
-            grid.innerHTML = '';
-            finalPhotos.forEach((photoData, index) => {
-                const img = document.createElement('img');
-                img.src = photoData;
-                grid.appendChild(img);
-            });
-        }
-
         function sendData() {
-            const id = document.getElementById('testeurId').value;
-            alert(`Données envoyées pour le testeur ${id}. Photos anonymisées.`);
+            alert("Données envoyées au système avec succès.");
         }
+        
+        // Drag & Drop tactile pour le carré noir
+        const sq = document.getElementById('blackSquare');
+        let isDragging = false;
+        sq.addEventListener('touchstart', (e) => { isDragging = true; });
+        document.addEventListener('touchmove', (e) => {
+            if(isDragging) {
+                sq.style.left = (e.touches[0].clientX - 40) + 'px';
+                sq.style.top = (e.touches[0].clientY - 40) + 'px';
+            }
+        });
+        sq.addEventListener('touchend', () => { isDragging = false; });
     </script>
 </body>
 </html>
