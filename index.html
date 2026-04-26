@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Atelier Audace - Collecte Morpho</title>
-    <link href="https://fonts.googleapis.com/css2?family=Allura&family=Montserrat:wght@300;600&display=swap" rel="stylesheet">
+    <title>Atelier Audace - Mesures Assistées</title>
+    <link href="https://fonts.googleapis.com/css2?family=Allura&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
-        :root { --sable: #E5D0BA; --noir: #1A1A1A; --indigo: #004D99; }
+        :root { --sable: #FDF8F2; --noir: #1A1A1A; --indigo: #004D99; --accent: #E5D0BA; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         
         body { 
@@ -15,96 +15,150 @@
             display: flex; flex-direction: column; align-items: center; min-height: 100vh;
         }
 
-        .container { width: 90%; max-width: 450px; text-align: center; padding: 20px 0; }
-        h1 { font-family: 'Allura', cursive; font-size: 3.2rem; margin: 10px 0; }
-        p.subtitle { margin-bottom: 25px; font-size: 0.7rem; letter-spacing: 2px; text-transform: uppercase; font-weight: 600; color: var(--indigo); }
-
-        input { 
-            width: 100%; padding: 15px; margin: 10px 0; border: 2px solid var(--indigo); 
-            background: rgba(255,255,255,0.4); font-family: 'Montserrat', sans-serif; font-size: 1rem; border-radius: 0;
-        }
-
-        .btn { 
-            background: var(--indigo); color: white; border: none; padding: 18px; 
-            width: 100%; cursor: pointer; font-family: 'Montserrat', sans-serif; 
-            font-weight: 600; text-transform: uppercase; margin-top: 15px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: 0.3s;
-        }
-
-        .btn:active { transform: scale(0.98); background: var(--noir); }
-
-        /* Interface de Calibration */
-        #calibration-zone { 
-            position: relative; width: 100%; margin-top: 20px;
-            border: 4px solid var(--indigo); background: #000; display: none; touch-action: none; 
-            overflow: hidden;
-        }
-        #photo-canvas { width: 100%; display: block; }
+        .container { width: 90%; max-width: 450px; text-align: center; padding: 30px 0; display: flex; flex-direction: column; min-height: 100vh; }
         
+        /* Logo dynamique */
+        .logo { width: 160px; height: auto; margin: 0 auto 20px auto; display: block; }
+        
+        h1 { font-family: 'Allura', cursive; font-size: 2.8rem; margin: 10px 0; color: var(--indigo); }
+        h2 { font-size: 1rem; font-weight: 300; line-height: 1.6; margin-bottom: 20px; }
+        .bold { font-weight: 600; color: var(--indigo); }
+
+        /* Cartes et Inputs */
+        .card { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #EEE; margin-bottom: 20px; }
+        input { 
+            width: 100%; padding: 15px; margin: 10px 0; border: 1.5px solid #EEE; border-radius: 8px;
+            font-family: 'Montserrat', sans-serif; font-size: 1rem; text-align: center;
+        }
+        input:focus { border-color: var(--indigo); outline: none; background: #F9FBFF; }
+
+        /* Boutons */
+        .btn { 
+            background: var(--indigo); color: white; border: none; padding: 18px; border-radius: 8px;
+            width: 100%; cursor: pointer; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;
+            box-shadow: 0 4px 10px rgba(0,77,153,0.2); transition: 0.3s; margin-top: 10px;
+        }
+        .btn:active { transform: scale(0.98); background: var(--noir); }
+        .btn-secondary { background: var(--noir); margin-top: 10px; opacity: 0.8; }
+
+        /* Zone de Calibration */
+        #calibration-zone { position: relative; width: 100%; border-radius: 12px; overflow: hidden; background: #000; display: none; margin: 15px 0; touch-action: none; }
+        #photo-canvas { width: 100%; display: block; }
         .line { position: absolute; left: 0; width: 100%; height: 4px; background: var(--indigo); z-index: 10; cursor: ns-resize; }
         .line::after {
             content: "↔"; position: absolute; top: -18px; left: 50%; transform: translateX(-50%);
             background: var(--indigo); color: white; padding: 2px 15px; border-radius: 20px; font-weight: bold;
         }
 
+        /* Galerie Récap */
         #gallery { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 20px 0; }
-        .thumb-box { font-size: 0.6rem; font-weight: 600; text-transform: uppercase; color: var(--indigo); }
-        .thumb-box img { width: 100%; border: 1px solid var(--indigo); margin-top: 5px; background: white; }
+        .thumb-box { font-size: 0.65rem; font-weight: 600; text-transform: uppercase; color: var(--indigo); }
+        .thumb-box img { width: 100%; border: 2px solid white; border-radius: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-top: 5px; }
 
         .hidden { display: none !important; }
+        .instruction-box { text-align: left; background: #F0F4F8; padding: 20px; border-radius: 12px; border-left: 5px solid var(--indigo); font-size: 0.9rem; }
+        ul { padding-left: 20px; margin: 10px 0; }
+        li { margin-bottom: 8px; }
+
         .loader { color: var(--indigo); font-weight: 600; margin-top: 20px; animation: pulse 1.5s infinite; }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
     </style>
 </head>
 <body>
 
-    <div id="screen-1" class="container">
-        <h1>Atelier Audace</h1>
-        <p class="subtitle">Collecte Morphologique</p>
-        <input type="text" id="client-id" placeholder="ID TESTEUR (ex: ID001)">
-        <input type="number" id="stature" placeholder="STATURE DU CLIENT (CM)">
-        
-        <div style="margin-top: 30px; border-top: 1px solid rgba(0,0,0,0.1); padding-top: 20px;">
-            <p id="view-label" style="font-weight: 600; color: var(--indigo);">VUE À CAPTURER : <br><span id="current-view-name" style="font-size: 1.5rem;">FACE</span></p>
+    <div class="container">
+        <img src="votre-logo.png" alt="Logo Atelier Audace" class="logo" id="app-logo">
+
+        <div id="page-1">
+            <h1>Bienvenue</h1>
+            <h2>Découvrez le système innovant de <span class="bold">Wil - Créateur-Couturier</span> pour une prise de mesures assistée et personnalisée.</h2>
+            <button class="btn" onclick="showPage(2)">Commencer l'expérience</button>
+        </div>
+
+        <div id="page-2" class="hidden">
+            <div class="card">
+                <label class="bold" style="font-size: 0.8rem;">VOTRE N° DE TÉLÉPHONE</label>
+                <input type="tel" id="client-id" placeholder="Ex: 87 xx xx xx">
+                <br><br>
+                <label class="bold" style="font-size: 0.8rem;">VOTRE STATURE (CM)</label>
+                <input type="number" id="stature" placeholder="Ex: 175">
+            </div>
+            <button class="btn" onclick="showPage(3)">Suivant</button>
+        </div>
+
+        <div id="page-3" class="hidden">
+            <div class="instruction-box">
+                <span class="bold">Pour un résultat optimal :</span>
+                <ul>
+                    <li>Tenez-vous bien <span class="bold">droit</span>, tête haute.</li>
+                    <li>Bras le long du corps, <span class="bold">légèrement écartés</span>.</li>
+                    <li>Respectez la <span class="bold">même distance</span> pour les 3 photos.</li>
+                </ul>
+            </div>
+            <h2 class="bold" style="margin-top:25px;">Êtes-vous prêts ?</h2>
+            <button class="btn" onclick="showPage(4)">Je suis prêt</button>
+            <button class="btn btn-secondary" onclick="showPage(2)">Retour</button>
+        </div>
+
+        <div id="page-4" class="hidden">
+            <h2 class="bold" style="margin-bottom:5px;">VUE : <span id="current-view-name">FACE</span></h2>
+            <p id="calib-inst" style="font-size: 0.8rem; margin-bottom: 10px;">Prenez la photo, puis ajustez les lignes sur le crâne et les talons.</p>
+            
+            <div id="calibration-zone">
+                <canvas id="photo-canvas"></canvas>
+                <div id="line-head" class="line" style="top: 20%;"></div>
+                <div id="line-feet" class="line" style="top: 80%;"></div>
+            </div>
+
             <input type="file" id="file-input" accept="image/*" capture="environment" class="hidden">
-            <button class="btn" onclick="document.getElementById('file-input').click()">Ouvrir l'appareil photo</button>
+            <button id="btn-snap" class="btn" onclick="document.getElementById('file-input').click()">Ouvrir l'appareil photo</button>
+            <button id="btn-save-view" class="btn hidden" onclick="processAndSave()">Valider cette vue</button>
         </div>
-    </div>
 
-    <div id="screen-2" class="container hidden">
-        <p style="font-size: 0.9rem;">Positionnez les lignes sur le <br><b>Sommet du Crâne</b> et les <b>Talons</b>.</p>
-        <div id="calibration-zone">
-            <canvas id="photo-canvas"></canvas>
-            <div id="line-head" class="line" style="top: 20%;"></div>
-            <div id="line-feet" class="line" style="top: 80%;"></div>
+        <div id="page-5" class="hidden">
+            <div id="recap-ui">
+                <h1>Récapitulatif</h1>
+                <p style="font-size: 0.9rem;">Vérifiez vos 3 clichés avant la transmission.</p>
+                <div id="gallery"></div>
+                <div id="upload-status" class="hidden loader">TRANSMISSION À L'ATELIER...</div>
+                <button id="final-btn" class="btn" onclick="uploadToServer()">Confirmer et Envoyer</button>
+            </div>
+
+            <div id="success-ui" class="hidden">
+                <h1>Succès !</h1>
+                <div class="instruction-box" style="text-align: center; border-left: none; background: white;">
+                    <h2>Vos photos ont été envoyées avec succès à votre <span class="bold">Créateur-Couturier</span> pour analyse de votre taille idéale.</h2>
+                </div>
+                <button class="btn" onclick="location.reload()" style="margin-top:30px;">Fermer</button>
+            </div>
         </div>
-        <button class="btn" onclick="processAndSave()">Valider cette vue</button>
-    </div>
-
-    <div id="screen-3" class="container hidden">
-        <h1>Récapitulatif</h1>
-        <p style="font-size: 0.9rem;">Vérifiez vos 3 clichés avant l'envoi.</p>
-        <div id="gallery"></div>
-        <div id="upload-status" class="hidden loader">TRANSMISSION EN COURS VERS GOOGLE...</div>
-        <button id="final-btn" class="btn" onclick="uploadToServer()">Confirmer et Envoyer</button>
-        <button class="btn" style="background:var(--noir); margin-top: 10px;" onclick="location.reload()">Recommencer</button>
     </div>
 
     <script>
+        // CONFIGURATION
         const scriptURL = 'https://script.google.com/macros/s/AKfycbz_byaibLRE1GEDDGWeiAoQgFx0cSsEJ9IifZxuEIpGT2fwW7OARcEhMd3w7pDZz2IF/exec';
         const views = ['Face', 'Profil', 'Dos'];
         let currentIdx = 0;
         let originalImg = new Image();
         let finalImages = [];
 
-        // Gestion de la prise de photo
+        // NAVIGATION
+        function showPage(n) {
+            document.querySelectorAll('.container > div').forEach(p => p.classList.add('hidden'));
+            document.getElementById('page-' + n).classList.remove('hidden');
+            // Masque le logo pendant la calibration pour maximiser l'écran
+            document.getElementById('app-logo').className = (n === 4) ? 'logo hidden' : 'logo';
+        }
+
+        // CAPTURE PHOTO
         document.getElementById('file-input').onchange = function(e) {
             if(!e.target.files[0]) return;
             const reader = new FileReader();
             reader.onload = (f) => {
                 originalImg.onload = () => {
-                    document.getElementById('screen-1').classList.add('hidden');
-                    document.getElementById('screen-2').classList.remove('hidden');
+                    document.getElementById('btn-snap').classList.add('hidden');
+                    document.getElementById('btn-save-view').classList.remove('hidden');
+                    document.getElementById('calibration-zone').style.display = 'block';
                     startCalibration();
                 };
                 originalImg.src = f.target.result;
@@ -114,18 +168,12 @@
 
         function startCalibration() {
             const canvas = document.getElementById('photo-canvas');
-            const zone = document.getElementById('calibration-zone');
-            zone.style.display = 'block';
-            
-            // On limite la taille pour l'envoi Base64
             const maxW = 1000;
             const scale = maxW / originalImg.width;
             canvas.width = maxW;
             canvas.height = originalImg.height * scale;
-            
             const ctx = canvas.getContext('2d');
             ctx.drawImage(originalImg, 0, 0, canvas.width, canvas.height);
-            
             initDraggable(document.getElementById('line-head'));
             initDraggable(document.getElementById('line-feet'));
         }
@@ -142,43 +190,39 @@
             el.addEventListener('mousemove', moveHandler);
         }
 
+        // TRAITEMENT & SAUVEGARDE
         function processAndSave() {
             const canvas = document.getElementById('photo-canvas');
             const ctx = canvas.getContext('2d');
             const headY = (parseFloat(document.getElementById('line-head').style.top) / 100) * canvas.height;
             const feetY = (parseFloat(document.getElementById('line-feet').style.top) / 100) * canvas.height;
 
-            // Floutage Anonymat (Visage estimé)
+            // Floutage Anonymat
             ctx.save();
             ctx.filter = 'blur(40px)';
             ctx.drawImage(canvas, 0, headY + 10, canvas.width, canvas.height * 0.12, 0, headY + 10, canvas.width, canvas.height * 0.12);
             ctx.restore();
 
-            // Dessin des lignes repères sur l'image finale
-            ctx.strokeStyle = "#004D99";
-            ctx.lineWidth = 10;
+            // Lignes Repères
+            ctx.strokeStyle = "#004D99"; ctx.lineWidth = 10;
             ctx.beginPath(); ctx.moveTo(0, headY); ctx.lineTo(canvas.width, headY); ctx.stroke();
             ctx.beginPath(); ctx.moveTo(0, feetY); ctx.lineTo(canvas.width, feetY); ctx.stroke();
 
-            // Stockage
-            finalImages.push({ 
-                view: views[currentIdx], 
-                data: canvas.toDataURL('image/jpeg', 0.6) 
-            });
+            finalImages.push({ view: views[currentIdx], data: canvas.toDataURL('image/jpeg', 0.6) });
 
             currentIdx++;
             if(currentIdx < 3) {
                 document.getElementById('current-view-name').innerText = views[currentIdx].toUpperCase();
-                document.getElementById('screen-2').classList.add('hidden');
-                document.getElementById('screen-1').classList.remove('hidden');
+                document.getElementById('calibration-zone').style.display = 'none';
+                document.getElementById('btn-save-view').classList.add('hidden');
+                document.getElementById('btn-snap').classList.remove('hidden');
             } else {
                 renderGallery();
+                showPage(5);
             }
         }
 
         function renderGallery() {
-            document.getElementById('screen-2').classList.add('hidden');
-            document.getElementById('screen-3').classList.remove('hidden');
             const gal = document.getElementById('gallery');
             gal.innerHTML = '';
             finalImages.forEach(imgObj => {
@@ -189,10 +233,11 @@
             });
         }
 
+        // ENVOI FINAL
         function uploadToServer() {
             const id = document.getElementById('client-id').value;
             const stature = document.getElementById('stature').value;
-            if(!id || !stature) return alert("Veuillez remplir l'ID et la Stature.");
+            if(!id || !stature) return alert("Veuillez remplir votre N° de téléphone et votre stature.");
 
             document.getElementById('upload-status').classList.remove('hidden');
             document.getElementById('final-btn').disabled = true;
@@ -208,15 +253,15 @@
             fetch(scriptURL, {
                 method: 'POST',
                 mode: 'no-cors',
-                cache: 'no-cache',
                 body: JSON.stringify(payload)
             })
             .then(() => {
-                alert("BRAVO ! Les données ont été transmises avec succès.");
-                location.reload();
+                document.getElementById('recap-ui').classList.add('hidden');
+                document.getElementById('success-ui').classList.remove('hidden');
+                document.getElementById('app-logo').classList.remove('hidden');
             })
             .catch(err => {
-                alert("Erreur de connexion : " + err);
+                alert("Erreur de transmission. Vérifiez votre connexion.");
                 document.getElementById('final-btn').disabled = false;
             });
         }
