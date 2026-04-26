@@ -3,50 +3,91 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Audace - Collecte</title>
+    <title>Atelier Audace - Collecte Morpho</title>
     <link href="https://fonts.googleapis.com/css2?family=Allura&family=Montserrat:wght@300;600&display=swap" rel="stylesheet">
     <style>
         :root { --sable: #E5D0BA; --noir: #1A1A1A; --indigo: #004D99; }
-        body { background: var(--sable); color: var(--noir); font-family: 'Montserrat', sans-serif; margin: 0; display: flex; flex-direction: column; align-items: center; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
+        body { 
+            background-color: var(--sable); color: var(--noir); 
+            font-family: 'Montserrat', sans-serif; margin: 0; padding: 0;
+            display: flex; flex-direction: column; align-items: center; min-height: 100vh;
+        }
+
         .container { width: 90%; max-width: 450px; text-align: center; padding: 20px 0; }
-        h1 { font-family: 'Allura', cursive; font-size: 3.5rem; margin: 10px 0; }
-        input { width: 100%; padding: 15px; margin: 10px 0; border: 2px solid var(--indigo); background: rgba(255,255,255,0.4); font-size: 1rem; }
-        .btn { background: var(--indigo); color: white; border: none; padding: 18px; width: 100%; cursor: pointer; font-weight: 600; text-transform: uppercase; margin-top: 15px; }
-        #calibration-zone { position: relative; width: 100%; border: 4px solid var(--indigo); background: #000; display: none; touch-action: none; }
+        h1 { font-family: 'Allura', cursive; font-size: 3.2rem; margin: 10px 0; }
+        p.subtitle { margin-bottom: 25px; font-size: 0.7rem; letter-spacing: 2px; text-transform: uppercase; font-weight: 600; color: var(--indigo); }
+
+        input { 
+            width: 100%; padding: 15px; margin: 10px 0; border: 2px solid var(--indigo); 
+            background: rgba(255,255,255,0.4); font-family: 'Montserrat', sans-serif; font-size: 1rem; border-radius: 0;
+        }
+
+        .btn { 
+            background: var(--indigo); color: white; border: none; padding: 18px; 
+            width: 100%; cursor: pointer; font-family: 'Montserrat', sans-serif; 
+            font-weight: 600; text-transform: uppercase; margin-top: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: 0.3s;
+        }
+
+        .btn:active { transform: scale(0.98); background: var(--noir); }
+
+        /* Interface de Calibration */
+        #calibration-zone { 
+            position: relative; width: 100%; margin-top: 20px;
+            border: 4px solid var(--indigo); background: #000; display: none; touch-action: none; 
+            overflow: hidden;
+        }
         #photo-canvas { width: 100%; display: block; }
-        .line { position: absolute; left: 0; width: 100%; height: 4px; background: var(--indigo); z-index: 10; }
-        .line::after { content: "↔"; position: absolute; top: -18px; left: 50%; transform: translateX(-50%); background: var(--indigo); color: white; padding: 2px 15px; border-radius: 20px; }
+        
+        .line { position: absolute; left: 0; width: 100%; height: 4px; background: var(--indigo); z-index: 10; cursor: ns-resize; }
+        .line::after {
+            content: "↔"; position: absolute; top: -18px; left: 50%; transform: translateX(-50%);
+            background: var(--indigo); color: white; padding: 2px 15px; border-radius: 20px; font-weight: bold;
+        }
+
         #gallery { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 20px 0; }
-        .thumb-box img { width: 100%; border: 2px solid var(--indigo); }
+        .thumb-box { font-size: 0.6rem; font-weight: 600; text-transform: uppercase; color: var(--indigo); }
+        .thumb-box img { width: 100%; border: 1px solid var(--indigo); margin-top: 5px; background: white; }
+
         .hidden { display: none !important; }
-        .loader { color: var(--indigo); font-weight: 600; margin-top: 20px; }
+        .loader { color: var(--indigo); font-weight: 600; margin-top: 20px; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
     </style>
 </head>
 <body>
+
     <div id="screen-1" class="container">
         <h1>Atelier Audace</h1>
-        <input type="text" id="client-id" placeholder="ID TESTEUR">
-        <input type="number" id="stature" placeholder="STATURE (CM)">
-        <p style="font-weight:600; color:var(--indigo); margin-top:20px;">VUE : <span id="current-view-name">FACE</span></p>
-        <input type="file" id="file-input" accept="image/*" capture="environment" class="hidden">
-        <button class="btn" onclick="document.getElementById('file-input').click()">Prendre la photo</button>
+        <p class="subtitle">Collecte Morphologique</p>
+        <input type="text" id="client-id" placeholder="ID TESTEUR (ex: ID001)">
+        <input type="number" id="stature" placeholder="STATURE DU CLIENT (CM)">
+        
+        <div style="margin-top: 30px; border-top: 1px solid rgba(0,0,0,0.1); padding-top: 20px;">
+            <p id="view-label" style="font-weight: 600; color: var(--indigo);">VUE À CAPTURER : <br><span id="current-view-name" style="font-size: 1.5rem;">FACE</span></p>
+            <input type="file" id="file-input" accept="image/*" capture="environment" class="hidden">
+            <button class="btn" onclick="document.getElementById('file-input').click()">Ouvrir l'appareil photo</button>
+        </div>
     </div>
 
     <div id="screen-2" class="container hidden">
-        <p>Ajustez les lignes (Sommet du crâne / Talons)</p>
+        <p style="font-size: 0.9rem;">Positionnez les lignes sur le <br><b>Sommet du Crâne</b> et les <b>Talons</b>.</p>
         <div id="calibration-zone">
             <canvas id="photo-canvas"></canvas>
             <div id="line-head" class="line" style="top: 20%;"></div>
             <div id="line-feet" class="line" style="top: 80%;"></div>
         </div>
-        <button class="btn" onclick="processAndSave()">Valider</button>
+        <button class="btn" onclick="processAndSave()">Valider cette vue</button>
     </div>
 
     <div id="screen-3" class="container hidden">
-        <h1>Validation</h1>
+        <h1>Récapitulatif</h1>
+        <p style="font-size: 0.9rem;">Vérifiez vos 3 clichés avant l'envoi.</p>
         <div id="gallery"></div>
-        <div id="status" class="hidden loader">ENVOI EN COURS...</div>
-        <button id="final-btn" class="btn" onclick="uploadToServer()">Confirmer l'envoi</button>
+        <div id="upload-status" class="hidden loader">TRANSMISSION EN COURS VERS GOOGLE...</div>
+        <button id="final-btn" class="btn" onclick="uploadToServer()">Confirmer et Envoyer</button>
+        <button class="btn" style="background:var(--noir); margin-top: 10px;" onclick="location.reload()">Recommencer</button>
     </div>
 
     <script>
@@ -56,92 +97,126 @@
         let originalImg = new Image();
         let finalImages = [];
 
-        document.getElementById('file-input').onchange = (e) => {
+        // Gestion de la prise de photo
+        document.getElementById('file-input').onchange = function(e) {
             if(!e.target.files[0]) return;
             const reader = new FileReader();
             reader.onload = (f) => {
                 originalImg.onload = () => {
                     document.getElementById('screen-1').classList.add('hidden');
                     document.getElementById('screen-2').classList.remove('hidden');
-                    const canvas = document.getElementById('photo-canvas');
-                    document.getElementById('calibration-zone').style.display = 'block';
-                    canvas.width = originalImg.width;
-                    canvas.height = originalImg.height;
-                    canvas.getContext('2d').drawImage(originalImg, 0, 0);
-                    initDraggable(document.getElementById('line-head'));
-                    initDraggable(document.getElementById('line-feet'));
+                    startCalibration();
                 };
                 originalImg.src = f.target.result;
             };
             reader.readAsDataURL(e.target.files[0]);
         };
 
+        function startCalibration() {
+            const canvas = document.getElementById('photo-canvas');
+            const zone = document.getElementById('calibration-zone');
+            zone.style.display = 'block';
+            
+            // On limite la taille pour l'envoi Base64
+            const maxW = 1000;
+            const scale = maxW / originalImg.width;
+            canvas.width = maxW;
+            canvas.height = originalImg.height * scale;
+            
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(originalImg, 0, 0, canvas.width, canvas.height);
+            
+            initDraggable(document.getElementById('line-head'));
+            initDraggable(document.getElementById('line-feet'));
+        }
+
         function initDraggable(el) {
-            el.ontouchmove = (e) => {
+            const moveHandler = (e) => {
                 e.preventDefault();
+                let touch = e.touches ? e.touches[0] : e;
                 let rect = document.getElementById('calibration-zone').getBoundingClientRect();
-                let y = (e.touches[0].clientY - rect.top) / rect.height * 100;
+                let y = (touch.clientY - rect.top) / rect.height * 100;
                 if(y >= 0 && y <= 100) el.style.top = y + '%';
             };
+            el.addEventListener('touchmove', moveHandler, {passive: false});
+            el.addEventListener('mousemove', moveHandler);
         }
 
         function processAndSave() {
             const canvas = document.getElementById('photo-canvas');
             const ctx = canvas.getContext('2d');
-            const hY = (parseFloat(document.getElementById('line-head').style.top)/100)*canvas.height;
-            const fY = (parseFloat(document.getElementById('line-feet').style.top)/100)*canvas.height;
+            const headY = (parseFloat(document.getElementById('line-head').style.top) / 100) * canvas.height;
+            const feetY = (parseFloat(document.getElementById('line-feet').style.top) / 100) * canvas.height;
 
+            // Floutage Anonymat (Visage estimé)
             ctx.save();
-            ctx.filter = 'blur(50px)';
-            ctx.drawImage(canvas, 0, hY+5, canvas.width, canvas.height*0.15, 0, hY+5, canvas.width, canvas.height*0.15);
+            ctx.filter = 'blur(40px)';
+            ctx.drawImage(canvas, 0, headY + 10, canvas.width, canvas.height * 0.12, 0, headY + 10, canvas.width, canvas.height * 0.12);
             ctx.restore();
 
+            // Dessin des lignes repères sur l'image finale
             ctx.strokeStyle = "#004D99";
-            ctx.lineWidth = canvas.width * 0.015;
-            ctx.beginPath(); ctx.moveTo(0, hY); ctx.lineTo(canvas.width, hY); ctx.stroke();
-            ctx.beginPath(); ctx.moveTo(0, fY); ctx.lineTo(canvas.width, fY); ctx.stroke();
+            ctx.lineWidth = 10;
+            ctx.beginPath(); ctx.moveTo(0, headY); ctx.lineTo(canvas.width, headY); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(0, feetY); ctx.lineTo(canvas.width, feetY); ctx.stroke();
 
-            finalImages.push({ view: views[currentIdx], data: canvas.toDataURL('image/jpeg', 0.5) });
+            // Stockage
+            finalImages.push({ 
+                view: views[currentIdx], 
+                data: canvas.toDataURL('image/jpeg', 0.6) 
+            });
+
             currentIdx++;
             if(currentIdx < 3) {
                 document.getElementById('current-view-name').innerText = views[currentIdx].toUpperCase();
                 document.getElementById('screen-2').classList.add('hidden');
                 document.getElementById('screen-1').classList.remove('hidden');
             } else {
-                document.getElementById('screen-2').classList.add('hidden');
-                document.getElementById('screen-3').classList.remove('hidden');
-                finalImages.forEach(img => {
-                    const div = document.createElement('div');
-                    div.className = "thumb-box";
-                    div.innerHTML = `<img src="${img.data}">`;
-                    document.getElementById('gallery').appendChild(div);
-                });
+                renderGallery();
             }
+        }
+
+        function renderGallery() {
+            document.getElementById('screen-2').classList.add('hidden');
+            document.getElementById('screen-3').classList.remove('hidden');
+            const gal = document.getElementById('gallery');
+            gal.innerHTML = '';
+            finalImages.forEach(imgObj => {
+                const div = document.createElement('div');
+                div.className = "thumb-box";
+                div.innerHTML = `<span>${imgObj.view}</span><img src="${imgObj.data}">`;
+                gal.appendChild(div);
+            });
         }
 
         function uploadToServer() {
             const id = document.getElementById('client-id').value;
             const stature = document.getElementById('stature').value;
-            if(!id || !stature) return alert("Champs vides");
-            
-            document.getElementById('status').classList.remove('hidden');
+            if(!id || !stature) return alert("Veuillez remplir l'ID et la Stature.");
+
+            document.getElementById('upload-status').classList.remove('hidden');
             document.getElementById('final-btn').disabled = true;
+
+            const payload = {
+                id_testeur: id,
+                stature: stature,
+                photoFace: finalImages[0].data,
+                photoProfil: finalImages[1].data,
+                photoDos: finalImages[2].data
+            };
 
             fetch(scriptURL, {
                 method: 'POST',
                 mode: 'no-cors',
-                body: JSON.stringify({
-                    id_testeur: id,
-                    stature: stature,
-                    photoFace: finalImages[0].data,
-                    photoProfil: finalImages[1].data,
-                    photoDos: finalImages[2].data
-                })
-            }).then(() => {
-                alert("Données envoyées !");
+                cache: 'no-cache',
+                body: JSON.stringify(payload)
+            })
+            .then(() => {
+                alert("BRAVO ! Les données ont été transmises avec succès.");
                 location.reload();
-            }).catch(() => {
-                alert("Erreur");
+            })
+            .catch(err => {
+                alert("Erreur de connexion : " + err);
                 document.getElementById('final-btn').disabled = false;
             });
         }
