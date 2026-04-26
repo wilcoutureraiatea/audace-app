@@ -2,293 +2,130 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Atelier Audace - Calibration</title>
+    <link href="https://fonts.googleapis.com/css2?family=Allura&family=Montserrat:wght@300&display=swap" rel="stylesheet">
     <style>
-        body { background-color: #1a1a1a; color: #ffffff; font-family: 'Helvetica Neue', Arial, sans-serif; display: flex; justify-content: center; padding: 20px; margin: 0; }
-        .app-container { width: 100%; max-width: 600px; background: #ffffff; padding: 30px; border-radius: 12px; color: #333; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
-        .logo-placeholder { width: 120px; height: 60px; background: #eee; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px auto; border-radius: 8px; color: #999; }
-        h1 { text-align: center; font-size: 24px; color: #1a1a1a; margin-bottom: 30px; }
-        h2 { text-align: center; color: #1a1a1a; }
-        input { width: 100%; padding: 15px; margin: 10px 0; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
-        button { width: 100%; padding: 18px; margin-top: 15px; background: #1a1a1a; color: #fff; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px; }
-        .btn-capture { background: #444; }
-        .capture-zone { position: relative; width: 100%; margin-top: 15px; border-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Atelier Audace - Calibration</title>
-    <style>
-        /* Charte Graphique Validée */
-        body { background-color: #1a1a1a; color: #ffffff; font-family: 'Helvetica Neue', Arial, sans-serif; display: flex; justify-content: center; padding: 20px; margin: 0; }
-        .app-container { width: 100%; max-width: 600px; background: #ffffff; padding: 30px; border-radius: 12px; color: #333; box-shadow: 0 4px 15px rgba(0,0,0,0.3); position: relative;}
+        body { background-color: #E5D0BA; color: #1A1A1A; font-family: 'Montserrat', sans-serif; margin: 0; text-align: center; }
+        h1 { font-family: 'Allura', cursive; font-size: 3.5rem; margin: 10px 0; }
+        #app-container { max-width: 500px; margin: auto; padding: 20px; }
         
-        .logo-placeholder { width: 120px; height: 60px; background: #eee; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px auto; border-radius: 8px; font-size: 12px; color: #999; }
-
-        h1 { text-align: center; font-size: 24px; color: #1a1a1a; margin-bottom: 30px; }
-        h2 { text-align: center; color: #1a1a1a; }
+        .input-group { margin-bottom: 15px; text-align: left; }
+        input, select { width: 100%; padding: 10px; border: 1px solid #004D99; background: rgba(255,255,255,0.5); }
         
-        input { width: 100%; padding: 15px; margin: 10px 0; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
+        #camera-box { position: relative; width: 100%; aspect-ratio: 3/4; background: #000; border: 3px solid #004D99; overflow: hidden; }
+        video { width: 100%; height: 100%; object-fit: cover; }
         
-        button { width: 100%; padding: 18px; margin-top: 15px; background: #1a1a1a; color: #fff; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px; transition: background 0.2s; }
-        button:hover { background: #333; }
-        .btn-capture { background: #444; }
+        /* Rigueur Mathématique : Lignes de repère */
+        .guide { position: absolute; width: 100%; height: 2px; background: #004D99; z-index: 100; box-shadow: 0 0 5px rgba(0,77,153,0.5); }
+        #line-head { top: 15%; }
+        #line-feet { bottom: 10%; }
+        .label-guide { position: absolute; color: #004D99; font-size: 10px; font-weight: bold; right: 5px; }
 
-        .capture-zone { position: relative; width: 100%; margin-top: 15px; overflow: hidden; border-radius: 8px; border: 2px solid #1a1a1a; background: #000; display: none;}
-        #previewImg { width: 100%; display: block; }
-        
-        #blackSquare { position: absolute; width: 60px; height: 60px; background-color: black; border: 2px solid white; cursor: move; touch-action: none; top: 10px; left: 10px; box-sizing: border-box; display: none; z-index: 10;}
-
-        .photo-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 20px; }
-        .photo-grid img { width: 100%; border-radius: 8px; border: 2px solid #ccc; background: #eee; }
-
-        .hidden { display: none; }
+        .btn { background: #004D99; color: white; border: none; padding: 15px 30px; cursor: pointer; font-family: 'Montserrat', sans-serif; width: 100%; margin-top: 10px; }
+        .btn-secondary { background: #1A1A1A; margin-top: 5px; }
+        #canvas-preview { display: none; width: 100%; }
     </style>
 </head>
 <body>
-    <div class="app-container">
-        <div class="logo-placeholder">LOGO</div>
+    <div id="app-container">
+        <h1>Atelier Audace</h1>
         
-        <div id="step1">
-            <h1>Analyse Morphologique</h1>
-            <input type="number" id="testeurId" placeholder="N° du testeur" inputmode="numeric" pattern="[0-9]*">
-            <input type="number" id="stature" placeholder="Stature (cm)" inputmode="numeric" pattern="[0-9]*">
-            <button onclick="startCapture()">Démarrer la capture</button>
-        </div>
-
-        <div id="step2" class="hidden">
-            <h2 id="captureLabel">Capture : Face</h2>
-            <input type="file" id="cameraInput" accept="image/*" style="display:none">
-            <button id="btnCapture" class="btn-capture" onclick="document.getElementById('cameraInput').click()">Ouvrir l'appareil photo</button>
-
-            <div class="capture-zone" id="captureZone">
-                <img id="previewImg" src="" alt="Prévisualisation">
-                <div id="blackSquare"></div>
+        <div id="setup-step">
+            <div class="input-group">
+                <label>ID Testeur</label>
+                <input type="text" id="id_testeur" placeholder="Ex: TEST001">
             </div>
-
-            <button id="btnNext" class="hidden" onclick="processAndNext()">Valider le masquage</button>
+            <div class="input-group">
+                <label>Stature (cm)</label>
+                <input type="number" id="stature" placeholder="Ex: 175">
+            </div>
+            <button class="btn" onclick="startCamera()">Démarrer la Calibration</button>
         </div>
 
-        <div id="step3" class="hidden">
-            <h2>Validation des photos</h2>
-            <div class="photo-grid" id="photoGrid"></div>
-            <button onclick="sendData()">Envoyer au système</button>
-            <button onclick="location.reload()" style="background:#cc0000;">Recommencer</button>
+        <div id="capture-step" style="display:none;">
+            <h3 id="step-title">Vue de Face</h3>
+            <div id="camera-box">
+                <video id="video" autoplay playsinline></video>
+                <div id="line-head" class="guide"><span class="label-guide">SOMMET CRÂNE</span></div>
+                <div id="line-feet" class="guide"><span class="label-guide">BASE TALONS</span></div>
+            </div>
+            <button class="btn" onclick="takeSnapshot()">Prendre la photo</button>
+        </div>
+
+        <div id="preview-step" style="display:none;">
+            <h3>Vérification Anonymat</h3>
+            <canvas id="canvas-preview"></canvas>
+            <button class="btn" onclick="confirmPhoto()">Valider & Suivant</button>
+            <button class="btn btn-secondary" onclick="retake()">Recommencer</button>
         </div>
     </div>
 
     <script>
         let currentStep = 0;
         const steps = ['Face', 'Profil', 'Dos'];
-        const finalPhotos = [];
-        const captureZone = document.getElementById('captureZone');
-        const blackSquare = document.getElementById('blackSquare');
-        let isDragging = false;
-        let startX, startY, initialLeft, initialTop;
+        let photos = {};
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas-preview');
 
-        function startCapture() {
-            if(!document.getElementById('testeurId').value || !document.getElementById('stature').value) return alert("Remplissez tout.");
-            document.getElementById('step1').classList.add('hidden');
-            document.getElementById('step2').classList.remove('hidden');
+        async function startCamera() {
+            if(!document.getElementById('id_testeur').value || !document.getElementById('stature').value) return alert("Veuillez remplir les infos.");
+            document.getElementById('setup-step').style.display = 'none';
+            document.getElementById('capture-step').style.display = 'block';
+            const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" }, audio: false });
+            video.srcObject = stream;
         }
 
-        document.getElementById('cameraInput').addEventListener('change', function(e) {
-            const reader = new FileReader();
-            reader.onload = function(event) {
-                document.getElementById('previewImg').src = event.target.result;
-                captureZone.style.display = 'block';
-                blackSquare.style.display = 'block';
-                document.getElementById('btnNext').classList.remove('hidden');
-            }
-            reader.readAsDataURL(e.target.files[0]);
-        });
-
-        // Logique de Drag avec contrainte de sécurité
-        function startDrag(e) {
-            isDragging = true;
-            startX = e.type.startsWith('touch') ? e.touches[0].clientX : e.clientX;
-            startY = e.type.startsWith('touch') ? e.touches[0].clientY : e.clientY;
-            initialLeft = blackSquare.offsetLeft;
-            initialTop = blackSquare.offsetTop;
-        }
-
-        function doDrag(e) {
-            if (!isDragging) return;
-            e.preventDefault();
-            const clientX = e.type.startsWith('touch') ? e.touches[0].clientX : e.clientX;
-            const clientY = e.type.startsWith('touch') ? e.touches[0].clientY : e.clientY;
-            
-            // CONTRAINTES DE SÉCURITÉ : Zone centrale uniquement pour protéger stature
-            const minTop = captureZone.offsetHeight * 0.15;
-            const maxTop = captureZone.offsetHeight * 0.45;
-            
-            let newLeft = initialLeft + (clientX - startX);
-            let newTop = initialTop + (clientY - startY);
-            
-            newLeft = Math.max(0, Math.min(newLeft, captureZone.offsetWidth - blackSquare.offsetWidth));
-            newTop = Math.max(minTop, Math.min(newTop, maxTop));
-            
-            blackSquare.style.left = newLeft + 'px';
-            blackSquare.style.top = newTop + 'px';
-        }
-
-        blackSquare.addEventListener('mousedown', startDrag);
-        window.addEventListener('mousemove', doDrag);
-        window.addEventListener('mouseup', () => { isDragging = false; });
-        blackSquare.addEventListener('touchstart', startDrag);
-        window.addEventListener('touchmove', doDrag, { passive: false });
-        window.addEventListener('touchend', () => { isDragging = false; });
-
-        function processAndNext() {
-            const canvas = document.createElement('canvas');
+        function takeSnapshot() {
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
             const ctx = canvas.getContext('2d');
-            const img = document.getElementById('previewImg');
-            canvas.width = 1200;
-            canvas.height = (img.naturalHeight / img.naturalWidth) * 1200;
-            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-            const scaleX = canvas.width / img.offsetWidth;
-            const scaleY = canvas.height / img.offsetHeight;
-            ctx.fillStyle = 'black';
-            ctx.fillRect(blackSquare.offsetLeft * scaleX, blackSquare.offsetTop * scaleY, blackSquare.offsetWidth * scaleX, blackSquare.offsetHeight * scaleY);
-            finalPhotos.push(canvas.toDataURL('image/jpeg', 0.8));
+            ctx.drawImage(video, 0, 0);
+            
+            // IA FLOU ANONYMAT : Floutage de la zone haute (visage)
+            ctx.filter = 'blur(20px)';
+            ctx.fillRect(canvas.width*0.3, 0, canvas.width*0.4, canvas.height*0.25);
+            ctx.filter = 'none';
+
+            document.getElementById('capture-step').style.display = 'none';
+            document.getElementById('preview-step').style.display = 'block';
+            canvas.style.display = 'block';
+        }
+
+        function confirmPhoto() {
+            photos[steps[currentStep]] = canvas.toDataURL('image/jpeg', 0.8);
             currentStep++;
             if(currentStep < 3) {
-                document.getElementById('captureLabel').innerText = "Capture : " + steps[currentStep];
-                captureZone.style.display = 'none';
-                document.getElementById('btnNext').classList.add('hidden');
+                document.getElementById('step-title').innerText = "Vue de " + steps[currentStep];
+                retake();
             } else {
-                document.getElementById('step2').classList.add('hidden');
-                document.getElementById('step3').classList.remove('hidden');
-                finalPhotos.forEach(p => { const i = document.createElement('img'); i.src = p; document.getElementById('photoGrid').appendChild(i); });
-            }
-        }
-        function sendData() { alert("Données enregistrées."); }
-    </script>
-</body>
-</html>radius: 8px; border: 2px solid #1a1a1a; background: #000; display: none; }
-        #previewImg { width: 100%; display: block; }
-        #blackSquare { position: absolute; width: 60px; height: 60px; background-color: black; border: 2px solid white; cursor: move; touch-action: none; top: 150px; left: 100px; z-index: 10; display: none; }
-        .photo-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 20px; }
-        .photo-grid img { width: 100%; border-radius: 8px; border: 2px solid #ccc; background: #eee; }
-        .hidden { display: none; }
-    </style>
-</head>
-<body>
-    <div class="app-container">
-        <div class="logo-placeholder">LOGO</div>
-        
-        <div id="step1">
-            <h1>Analyse Morphologique</h1>
-            <input type="number" id="testeurId" placeholder="N° du testeur" inputmode="numeric">
-            <input type="number" id="stature" placeholder="Stature (cm)" inputmode="numeric">
-            <button onclick="startCapture()">Démarrer la capture</button>
-        </div>
-
-        <div id="step2" class="hidden">
-            <h2 id="captureLabel">Capture : Face</h2>
-            <input type="file" id="cameraInput" accept="image/*" style="display:none">
-            <button id="btnCapture" class="btn-capture" onclick="document.getElementById('cameraInput').click()">Ouvrir l'appareil photo</button>
-            <div class="capture-zone" id="captureZone">
-                <img id="previewImg" src="">
-                <div id="blackSquare"></div>
-            </div>
-            <button id="btnNext" class="hidden" onclick="processAndNext()">Valider le masquage</button>
-        </div>
-
-        <div id="step3" class="hidden">
-            <h2>Validation des photos</h2>
-            <div class="photo-grid" id="photoGrid"></div>
-            <button onclick="sendData()">Envoyer au système</button>
-        </div>
-    </div>
-
-    <script>
-        let currentStep = 0;
-        const steps = ['Face', 'Profil', 'Dos'];
-        const finalPhotos = [];
-        const captureZone = document.getElementById('captureZone');
-        const blackSquare = document.getElementById('blackSquare');
-        let isDragging = false;
-        let startX, startY, initialLeft, initialTop;
-
-        function startCapture() {
-            if(!document.getElementById('testeurId').value || !document.getElementById('stature').value) return alert("Remplissez tout.");
-            document.getElementById('step1').classList.add('hidden');
-            document.getElementById('step2').classList.remove('hidden');
-        }
-
-        document.getElementById('cameraInput').addEventListener('change', function(e) {
-            const reader = new FileReader();
-            reader.onload = function(event) {
-                document.getElementById('previewImg').src = event.target.result;
-                captureZone.style.display = 'block';
-                blackSquare.style.display = 'block';
-                document.getElementById('btnNext').classList.remove('hidden');
-            }
-            reader.readAsDataURL(e.target.files[0]);
-        });
-
-        function startDrag(e) {
-            isDragging = true;
-            startX = e.type.startsWith('touch') ? e.touches[0].clientX : e.clientX;
-            startY = e.type.startsWith('touch') ? e.touches[0].clientY : e.clientY;
-            initialLeft = blackSquare.offsetLeft;
-            initialTop = blackSquare.offsetTop;
-        }
-
-        function doDrag(e) {
-            if (!isDragging) return;
-            e.preventDefault();
-            const clientX = e.type.startsWith('touch') ? e.touches[0].clientX : e.clientX;
-            const clientY = e.type.startsWith('touch') ? e.touches[0].clientY : e.clientY;
-            
-            // CONTRAINTES DE SÉCURITÉ : Le carré reste dans la zone 15% - 40% de la hauteur
-            const maxTop = captureZone.offsetHeight * 0.40;
-            const minTop = captureZone.offsetHeight * 0.15;
-            
-            let newLeft = initialLeft + (clientX - startX);
-            let newTop = initialTop + (clientY - startY);
-            
-            newLeft = Math.max(0, Math.min(newLeft, captureZone.offsetWidth - blackSquare.offsetWidth));
-            newTop = Math.max(minTop, Math.min(newTop, maxTop));
-            
-            blackSquare.style.left = newLeft + 'px';
-            blackSquare.style.top = newTop + 'px';
-        }
-
-        blackSquare.addEventListener('mousedown', startDrag);
-        window.addEventListener('mousemove', doDrag);
-        window.addEventListener('mouseup', () => { isDragging = false; });
-        blackSquare.addEventListener('touchstart', startDrag);
-        window.addEventListener('touchmove', doDrag, { passive: false });
-        window.addEventListener('touchend', () => { isDragging = false; });
-
-        function processAndNext() {
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            const img = document.getElementById('previewImg');
-            canvas.width = 1200;
-            canvas.height = (img.naturalHeight / img.naturalWidth) * 1200;
-            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-            const scaleX = canvas.width / img.offsetWidth;
-            const scaleY = canvas.height / img.offsetHeight;
-            ctx.fillStyle = 'black';
-            ctx.fillRect(blackSquare.offsetLeft * scaleX, blackSquare.offsetTop * scaleY, blackSquare.offsetWidth * scaleX, blackSquare.offsetHeight * scaleY);
-            finalPhotos.push(canvas.toDataURL('image/jpeg', 0.8));
-            currentStep++;
-            if(currentStep < 3) {
-                document.getElementById('captureLabel').innerText = "Capture : " + steps[currentStep];
-                captureZone.style.display = 'none';
-                document.getElementById('btnNext').classList.add('hidden');
-            } else {
-                document.getElementById('step2').classList.add('hidden');
-                document.getElementById('step3').classList.remove('hidden');
-                finalPhotos.forEach(p => { const i = document.createElement('img'); i.src = p; document.getElementById('photoGrid').appendChild(i); });
+                sendData();
             }
         }
 
-        function sendData() { alert("Données prêtes."); }
+        function retake() {
+            document.getElementById('preview-step').style.display = 'none';
+            document.getElementById('capture-step').style.display = 'block';
+        }
+
+        async function sendData() {
+            alert("Envoi des données à l'Atelier... Veuillez patienter.");
+            const payload = {
+                id_testeur: document.getElementById('id_testeur').value,
+                stature: document.getElementById('stature').value,
+                photoFace: photos.Face,
+                photoProfil: photos.Profil,
+                photoDos: photos.Dos,
+                patron: "Audace_V1" // Modifiable
+            };
+            
+            // Remplacez par votre URL de déploiement Google Apps Script
+            const GAS_URL = "VOTRE_URL_SCRIPT_ICI";
+            
+            fetch(GAS_URL, { method: 'POST', body: JSON.stringify(payload) })
+            .then(res => res.json())
+            .then(data => alert("Calibration terminée avec succès !"));
+        }
     </script>
 </body>
 </html>
