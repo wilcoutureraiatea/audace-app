@@ -3,60 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Atelier Audace - Précision</title>
+    <title>Analyse Morphologique</title>
     <style>
-        body { background-color: #1a1a1a; color: #ffffff; font-family: 'Helvetica Neue', sans-serif; display: flex; justify-content: center; padding: 20px; margin: 0; }
+        /* Charte Graphique */
+        body { background-color: #1a1a1a; color: #ffffff; font-family: 'Helvetica Neue', Arial, sans-serif; display: flex; justify-content: center; padding: 20px; margin: 0; }
         .app-container { width: 100%; max-width: 600px; background: #ffffff; padding: 30px; border-radius: 12px; color: #333; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
         .logo { width: 120px; display: block; margin: 0 auto 20px auto; }
-        input { width: 100%; padding: 18px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
-        button { width: 100%; padding: 18px; margin-top: 15px; background: #000; color: #fff; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; text-transform: uppercase; }
-        .capture-zone { position: relative; width: 100%; margin-top: 20px; border: 2px solid #000; background: #000; display: none; }
-        #previewImg { width: 100%; display: block; }
-        /* Masque fixe et centré */
-        #blackSquare { position: absolute; width: 20%; height: 15%; background-color: black; border: 2px solid white; top: 15%; left: 40%; z-index: 10; display: none; }
-        .photo-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 20px; }
-        .photo-grid img { width: 100%; border-radius: 8px; border: 2px solid #ccc; }
+        h1 { text-align: center; font-size: 24px; color: #1a1a1a; margin-bottom: 30px; }
+        input { width: 100%; padding: 15px; margin: 10px 0; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; }
+        button { width: 100%; padding: 15px; margin-top: 15px; background: #1a1a1a; color: #fff; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        button:disabled { background: #ccc; }
+        
+        /* Zone de capture et masque */
+        .capture-wrapper { position: relative; width: 100%; margin-top: 15px; display: none; }
+        .preview { width: 100%; border-radius: 8px; border: 2px solid #1a1a1a; display: block; }
+        .mask { position: absolute; top: 15%; left: 35%; width: 30%; height: 15%; background: black; border: 2px solid white; pointer-events: none; }
+        
         .hidden { display: none; }
     </style>
 </head>
 <body>
     <div class="app-container">
-        <img src="ton-logo.png" class="logo" alt="Logo">
+        <img src="ton-logo.png" alt="Logo" class="logo">
         
         <div id="step1">
             <h1>Analyse Morphologique</h1>
-            <input type="number" id="testeurId" placeholder="N° Testeur" inputmode="numeric">
+            <input type="number" id="testeurId" placeholder="N° du testeur" inputmode="numeric">
             <input type="number" id="stature" placeholder="Stature (cm)" inputmode="numeric">
-            <button onclick="startCapture()">Démarrer</button>
+            <button onclick="startCapture()">Démarrer la capture</button>
         </div>
 
         <div id="step2" class="hidden">
             <h2 id="captureLabel">Capture : Face</h2>
             <input type="file" id="cameraInput" accept="image/*" style="display:none">
-            <button onclick="document.getElementById('cameraInput').click()">Ouvrir Appareil Photo</button>
-            <div class="capture-zone" id="captureZone">
-                <img id="previewImg" src="">
-                <div id="blackSquare"></div>
+            <button id="btnCapture" onclick="document.getElementById('cameraInput').click()">Prendre la photo</button>
+            
+            <div id="captureWrapper" class="capture-wrapper">
+                <img id="preview" class="preview">
+                <div class="mask"></div>
             </div>
-            <button id="btnNext" class="hidden" onclick="processAndNext()">Valider et Suivant</button>
-        </div>
-
-        <div id="step3" class="hidden">
-            <h2>Validation Finale</h2>
-            <div class="photo-grid" id="photoGrid"></div>
-            <button onclick="sendData()">Enregistrer les données</button>
+            
+            <button id="btnNext" class="hidden" onclick="processAndNext()">Valider et suivant</button>
         </div>
     </div>
 
     <script>
         let currentStep = 0;
         const steps = ['Face', 'Profil', 'Dos'];
-        const finalData = { photos: [], stature: 0 };
 
         function startCapture() {
-            const st = document.getElementById('stature').value;
-            if(!st) return alert("Stature requise.");
-            finalData.stature = st;
+            if(!document.getElementById('testeurId').value) return alert("Remplissez le N°");
             document.getElementById('step1').classList.add('hidden');
             document.getElementById('step2').classList.remove('hidden');
         }
@@ -64,46 +60,43 @@
         document.getElementById('cameraInput').addEventListener('change', function(e) {
             const reader = new FileReader();
             reader.onload = function(event) {
-                document.getElementById('previewImg').src = event.target.result;
-                document.getElementById('captureZone').style.display = 'block';
-                document.getElementById('blackSquare').style.display = 'block';
+                const img = document.getElementById('preview');
+                img.src = event.target.result;
+                document.getElementById('captureWrapper').style.display = 'block';
                 document.getElementById('btnNext').classList.remove('hidden');
             }
             reader.readAsDataURL(e.target.files[0]);
         });
 
         function processAndNext() {
+            // Création du canvas pour fusionner le masque (anonymisation définitive)
+            const img = document.getElementById('preview');
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
-            const img = document.getElementById('previewImg');
             
+            // Compression à 1200px de large pour éviter la mémoire insuffisante
+            const scale = 1200 / img.naturalWidth;
             canvas.width = 1200;
-            canvas.height = (img.naturalHeight / img.naturalWidth) * 1200;
+            canvas.height = img.naturalHeight * scale;
+            
             ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
             
-            // Appliquer le masque fixe (calculé en pourcentage de l'image)
+            // Dessin du masque noir aux mêmes proportions que l'écran (30% large, 15% haut, centré)
             ctx.fillStyle = 'black';
-            ctx.fillRect(canvas.width * 0.4, canvas.height * 0.15, canvas.width * 0.2, canvas.height * 0.15);
+            ctx.fillRect(canvas.width * 0.35, canvas.height * 0.15, canvas.width * 0.3, canvas.height * 0.15);
             
-            finalData.photos.push(canvas.toDataURL('image/jpeg', 0.8));
+            // Ici, l'image est prête (tu peux l'envoyer dans `finalPhotos` ou ton système)
+            console.log("Photo traitée et anonymisée.");
 
             currentStep++;
             if(currentStep < 3) {
                 document.getElementById('captureLabel').innerText = "Capture : " + steps[currentStep];
-                document.getElementById('captureZone').style.display = 'none';
+                document.getElementById('captureWrapper').style.display = 'none';
                 document.getElementById('btnNext').classList.add('hidden');
             } else {
-                document.getElementById('step2').classList.add('hidden');
-                document.getElementById('step3').classList.remove('hidden');
-                finalData.photos.forEach(p => {
-                    const i = document.createElement('img'); i.src = p; document.getElementById('photoGrid').appendChild(i);
-                });
+                alert("Capture terminée.");
+                location.reload();
             }
-        }
-
-        function sendData() {
-            console.log("Données prêtes pour analyse :", finalData);
-            alert("Données enregistrées avec succès pour analyse.");
         }
     </script>
 </body>
