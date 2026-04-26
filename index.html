@@ -86,19 +86,25 @@
             <button class="btn" onclick="showPage(3)">Suivant</button>
         </div>
 
-        <div id="page-3" class="hidden">
-            <div class="instruction-box">
-                <span class="bold">Pour un résultat optimal :</span>
-                <ul>
-                    <li>Tenez-vous bien <span class="bold">droit</span>, tête haute.</li>
-                    <li>Bras le long du corps, <span class="bold">légèrement écartés</span>.</li>
-                    <li>Respectez la <span class="bold">même distance</span> pour les 3 photos.</li>
-                </ul>
-            </div>
-            <h2 class="bold" style="margin-top:25px;">Êtes-vous prêts ?</h2>
-            <button class="btn" onclick="showPage(4)">Je suis prêt</button>
-            <button class="btn btn-secondary" onclick="showPage(2)">Retour</button>
-        </div>
+       <div id="page-3" class="hidden">
+    <div class="instruction-box">
+        <p style="background: var(--accent); color: var(--indigo); padding: 10px; border-radius: 8px; font-weight: 600; text-align: center; margin-top: 0;">
+            📸 Important : Faites-vous assister pour la prise de vue.
+        </p>
+
+        <span class="bold">Pour un résultat optimal :</span>
+        <ul>
+            <li>Portez un <span class="bold">T-shirt uni moulant</span> (ou à l'envers).</li>
+            <li>Si le vêtement est large : <span class="bold">pincez l'excès de tissu</span> sur le côté opposé à la vue (dans le dos pour la face, devant pour le dos).</li>
+            <li>Tenez-vous bien <span class="bold">droit</span>, tête haute.</li>
+            <li>Bras le long du corps, <span class="bold">légèrement écartés</span>.</li>
+            <li>Gardez la <span class="bold">même distance</span> pour les 3 photos.</li>
+        </ul>
+    </div>
+    <h2 class="bold" style="margin-top:25px;">Êtes-vous prêts ?</h2>
+    <button class="btn" onclick="showPage(4)">Je suis prêt</button>
+    <button class="btn btn-secondary" onclick="showPage(2)">Retour</button>
+</div>
 
         <div id="page-4" class="hidden">
             <h2 class="bold" style="margin-bottom:5px;">VUE : <span id="current-view-name">FACE</span></h2>
